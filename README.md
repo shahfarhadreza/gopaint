@@ -6,6 +6,8 @@ I started leanring Go programming language recently and I wanted to make a compl
 This is only an alpha which means it probably has many buggs and not so stable. I will try to improve the codes over time and if anyone else want to help improving the codes, you are welcomed :) 
 
 
+![Alt text](/relative/path/to/preview.jpg?raw=true "Screenshot")
+
 
 
 
