@@ -48,22 +48,6 @@ func (tool *ToolText) prepare() {
 	canvas := mainWindow.workspace.canvas
 	win.SetFocus(canvas.GetHandle())
 	tool.resizing = false
-	//tool.newTextEditAt(&Point{X: 150, Y: 50})
-	//tool.textEdit.AppendText("I am Reza.\nThanks!")
-	/*
-		fontList := make(map[string]bool)
-		var lf win.LOGFONT
-		lf.LfFaceName[0] = 0
-		lf.LfCharSet = win.DEFAULT_CHARSET
-		hwnd := mainWindow.workspace.canvas.GetHandle()
-		hdc := win.GetDC(hwnd)
-		EnumFontFamiliesEx(hdc, &lf, syscall.NewCallback(enumFontFamExProc), uintptr(unsafe.Pointer(&fontList)), 0)
-		win.ReleaseDC(hwnd, hdc)
-
-		//for i := range fontList {
-		//log.Println(i)
-		//}
-	*/
 }
 
 func (tool *ToolText) getCursor(ptMouse *Point) win.HCURSOR {
@@ -87,7 +71,6 @@ func (tool *ToolText) getCursor(ptMouse *Point) win.HCURSOR {
 func (tool *ToolText) keyPressEvent(e *ToolKeyEvent) {
 	canvas := e.canvas
 	keycode := e.keycode
-	//log.Printf("key %d\n", keycode)
 	if tool.typing {
 		if keycode == win.VK_ESCAPE {
 			textEdit := tool.textEdit
@@ -130,15 +113,12 @@ func (tool *ToolText) draw(e *ToolDrawEvent) {
 			}
 			outRect := &gdiplus.RectF{}
 			graphics.MeasureStringEx("AAAAAAAAAAAAAAA", textEdit.font, &gdiplus.RectF{}, textEdit.format, outRect, nil, nil)
-			//textBasic := *g.MeasureText("AAAAAAAAAAAAAAA", win.DT_LEFT, textEdit.font.GetHandle())
 			textArea.Right = textArea.Left + int(outRect.Width)  //textBasic.Width()
 			textArea.Bottom = textArea.Top + int(outRect.Height) //textBasic.Height()
 			tool.textArea = textArea
 		}
 		rectBorder := tool.textArea
 		rectBorder.Inflate(7, 5)
-
-		//g.DrawFillRectangle(&tool.textArea, Rgb(10, 0, 255), Rgb(10, 0, 255))
 		textEdit.Draw(g, &color)
 
 		tool.resizer.SetRect(&rectBorder)
@@ -157,10 +137,7 @@ func (tool *ToolText) finalizeText() {
 	textEdit := tool.textEdit
 	if !textEdit.IsEmpty() {
 		gdicolor := getColorForeground()
-		//textColor := fromGdiplusColor(&gdicolor)
 		text := textEdit.GetText()
-		//RenderText(g, text, &tool.textArea, &textColor, tool.textEdit.font)
-		//gc.DrawText(text, &tool.textArea, win.DT_LEFT|win.DT_EXPANDTABS, color, tool.textEdit.font.GetHandle())
 		brush := gdiplus.NewSolidBrush(&gdicolor)
 		lrect := &gdiplus.RectF{X: float32(tool.textArea.Left), Y: float32(tool.textArea.Top), Width: 0, Height: 0}
 		g.DrawStringEx(text, textEdit.font, lrect, textEdit.format, brush.AsBrush())

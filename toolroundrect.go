@@ -12,10 +12,6 @@ func NewRoundedRectPath(bounds *gdiplus.Rect, radius int32) *gdiplus.GraphicsPat
 	path := gdiplus.NewPath(gdiplus.FillModeAlternate)
 	diameter := radius * 2
 	arc := gdiplus.NewRect(bounds.X, bounds.Y, diameter, diameter)
-	//if radius == 0 {
-	//	path.AddRectangle(bounds)
-	//	return path
-	//}
 	// top left arc
 	path.AddArcRect(arc, 180, 90)
 	// top right arc
@@ -49,12 +45,10 @@ func (tool *RoundRectDrawer) draw(args *ToolDrawShapeArgs) {
 	}
 	round := NewRoundedRectPath(&rect, radius)
 	if brush != nil {
-		//g.FillRectangleI(brush, int32(rect.X), int32(rect.Y), int32(rect.Width), int32(rect.Height))
 		g.FillPath(brush, round)
 	}
 	if pen != nil {
 		g.DrawPath(pen, round)
-		//g.DrawRectangleI(pen, int32(rect.X), int32(rect.Y), int32(rect.Width), int32(rect.Height))
 	}
 	round.Dispose()
 }
