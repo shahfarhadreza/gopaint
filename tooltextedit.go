@@ -248,7 +248,7 @@ func (te *TextEdit) Draw(g *Graphics, color *Color) {
 	graphics := gdiplus.NewGraphicsFromHDC(g.GetHDC())
 	//area := te.GetTextArea()
 	//RenderText(g, "I Am Shuvo", &area, color, te.font)
-	brush := gdiplus.NewSolidBrush(asGdiplusColor(color))
+	brush := gdiplus.NewSolidBrush(AsGdiplusColor(color))
 	graphics.SetTextRenderingHint(gdiplus.TextRenderingHintAntiAlias)
 	// Draw each line
 	for i := range te.lines {

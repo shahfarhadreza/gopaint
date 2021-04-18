@@ -49,8 +49,8 @@ func (tool *ToolBrush) changeSize(size int) {
 func (tool *ToolBrush) draw(e *ToolDrawEvent) {
 	pt := e.mouse
 	g := e.gdi32
-	gdipluscolor := getColorForeground()
-	color := fromGdiplusColor(&gdipluscolor)
+	gdipluscolor := GetColorForeground()
+	color := FromGdiplusColor(&gdipluscolor)
 	halfSize := (tool.size + 1) / 2
 	rect := &Rect{
 		Left:   pt.X - halfSize,
@@ -74,7 +74,7 @@ func (tool *ToolBrush) mouseDownEvent(e *ToolMouseEvent) {
 	//lastX := float64(e.lastPt.X)
 	//lastY := float64(e.lastPt.Y)
 	if mbutton == MouseButtonLeft || mbutton == MouseButtonRight {
-		color := getColorForeBack(mbutton)
+		color := GetColorForeBack(mbutton)
 		/*
 			brush := gdiplus.NewSolidBrush(&color)
 			ellipseSize := float32(tool.size) //(float32(tool.size) / 2.0) - 0.1
@@ -98,7 +98,7 @@ func (tool *ToolBrush) mouseMoveEvent(e *ToolMouseEvent) {
 	//dx := x - lastX
 	//dy := y - lastY
 	if mbutton == MouseButtonLeft || mbutton == MouseButtonRight {
-		color := getColorForeBack(mbutton)
+		color := GetColorForeBack(mbutton)
 		/*
 			brush := gdiplus.NewSolidBrush(&color)
 			ellipseSize := float32(tool.size) //(float32(tool.size) / 2.0) - 0.1

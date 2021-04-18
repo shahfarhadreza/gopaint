@@ -141,7 +141,7 @@ func (tool *ToolSelect) DeleteSelection() {
 	if tool.bitmap == nil {
 		// replace the area with background color
 		context := image.context
-		color := getColorBackground()
+		color := GetColorBackground()
 		brush := gdiplus.NewSolidBrush(&color)
 		rect := tool.selection.GetRect()
 		w, h := rect.Width(), rect.Height()
@@ -184,7 +184,7 @@ func (tool *ToolSelect) mouseDownEvent(e *ToolMouseEvent) {
 						bitmapContext.BitBlt(0, 0, w, h, e.image.context3.GetHDC(), rect.Left, rect.Top, win.SRCCOPY)
 						// replace the area with background color
 						context := e.image.context
-						color := getColorBackground()
+						color := GetColorBackground()
 						brush := gdiplus.NewSolidBrush(&color)
 						context.FillRectangleI(brush.AsBrush(), int32(rect.Left), int32(rect.Top), int32(w), int32(h))
 						brush.Dispose()
@@ -209,7 +209,7 @@ func (tool *ToolSelect) mouseMoveEvent(e *ToolMouseEvent) {
 	mbutton := e.mbutton
 	if mbutton == MouseButtonLeft || mbutton == MouseButtonRight {
 		if tool.currentAction == SelectActionSelecting {
-			startPoint, endPoint := getStartAndEnd(tool.startPoint, e.pt)
+			startPoint, endPoint := GetStartAndEnd(tool.startPoint, e.pt)
 			rect := Rect{
 				Left:   int(startPoint.X),
 				Top:    int(startPoint.Y),

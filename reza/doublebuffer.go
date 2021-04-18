@@ -52,7 +52,7 @@ func (db *DoubleBuffer) BeginDoubleBuffer(g *Graphics, rc *Rect, border, fill *C
 	db.bitmap = win.CreateCompatibleBitmap(g.hdc, int32(rc.Width()), int32(rc.Height()))
 	win.SelectObject(db.hdc, win.HGDIOBJ(db.bitmap))
 	db.newGraphics = &Graphics{db.hdc}
-	db.newGraphics.DrawFillRectangle(rc, border, fill)
+	db.newGraphics.FillRectangle(rc, border, fill)
 	defFont := win.GetStockObject(win.DEFAULT_GUI_FONT)
 	win.SelectObject(db.hdc, win.HGDIOBJ(defFont))
 	return db.newGraphics

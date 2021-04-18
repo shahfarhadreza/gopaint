@@ -69,11 +69,11 @@ func (window *MainWindow) Initialize() {
 	window.SetDestroyEventHandler(func() {
 		app.Exit()
 	})
-	window.initResources()
+	window.InitResources()
 
 	window.tools = NewToolsManager()
 
-	window.initRibbon()
+	window.InitRibbon()
 
 	statusbar := NewStatusbar(window)
 	statusbar.SetDockType(DockBottom)
@@ -113,7 +113,7 @@ func (window *MainWindow) Dispose() {
 	}
 }
 
-func (window *MainWindow) initResources() {
+func (window *MainWindow) InitResources() {
 	// Load some resources
 	window.hCursorArrow = win.LoadCursor(0, win.MAKEINTRESOURCE(win.IDC_ARROW))
 	window.hCursorSizeNS = win.LoadCursor(0, win.MAKEINTRESOURCE(win.IDC_SIZENS))
@@ -124,7 +124,7 @@ func (window *MainWindow) initResources() {
 	window.hCursorMove = win.LoadCursor(0, win.MAKEINTRESOURCE(win.IDC_SIZEALL))
 }
 
-func (window *MainWindow) initRibbonApplicationMenu() {
+func (window *MainWindow) InitRibbonApplicationMenu() {
 	ribbon := window.ribbon
 
 	fResetColors := func() {
@@ -220,7 +220,7 @@ func (window *MainWindow) initRibbonApplicationMenu() {
 	ribbon.SetApplicationMenu("File", appMenu)
 }
 
-func (window *MainWindow) initRibbon() {
+func (window *MainWindow) InitRibbon() {
 	logInfo("init Ribbon....")
 	window.ribbon = NewRibbon(window)
 	ribbon := window.ribbon
@@ -230,7 +230,7 @@ func (window *MainWindow) initRibbon() {
 
 	window.btnTools = make([]RibbonButton, 0)
 
-	window.initRibbonApplicationMenu()
+	window.InitRibbonApplicationMenu()
 
 	home := ribbon.AddTab("Home")
 
@@ -481,7 +481,7 @@ func (window *MainWindow) initRibbon() {
 	window.bsize.SetEnabled(false)
 
 	// init all the color buttons
-	window.initRibbonColorSection(home)
+	window.InitRibbonColorSection(home)
 
 	// view
 	view := ribbon.AddTab("View")
@@ -536,7 +536,7 @@ func (window *MainWindow) SetCurrentTool(newTool Tool) {
 	window.workspace.canvas.Repaint()
 }
 
-func (window *MainWindow) initRibbonColorSection(home *RibbonTab) {
+func (window *MainWindow) InitRibbonColorSection(home *RibbonTab) {
 	logInfo("init color section...")
 	colors := home.AddSection("Colors")
 
@@ -635,12 +635,12 @@ func (window *MainWindow) initRibbonColorSection(home *RibbonTab) {
 		newColor, _ := ChoseColorDialog(window, prevColor, prevCustomColors)
 		fForegroundBackground().SetColor(newColor)
 		// Check if it's a new color, then we add it into the custom colors
-		if !newColor.IsEqualTo(prevColor) {
+		if !newColor.IsEqualTo(&prevColor) {
 			alreadyExist := false
 			var emptyButton RibbonButton = nil
 			for _, button := range customColorButtons {
 				color := button.GetColor()
-				if newColor.IsEqualTo(color) {
+				if newColor.IsEqualTo(&color) {
 					alreadyExist = true
 					break
 				}

@@ -85,40 +85,7 @@ func (image *DrawingImage) HasFilePath() bool {
 
 func (image *DrawingImage) Clear(color *gdiplus.Color) {
 	image.context.Clear(color)
-	/*
-		//i := 0
-		//bitmapArray := di.Pix
-		for y := di.Bounds().Min.Y; y != di.Bounds().Max.Y; y++ {
-			for x := di.Bounds().Min.X; x != di.Bounds().Max.X; x++ {
-				di.Set(x, y, c.AsRGBA())
-
-					//bitmapArray[i+0] = 255
-					//bitmapArray[i+1] = 0
-					//bitmapArray[i+2] = 0
-					//bitmapArray[i+3] = 255
-					//i += 4
-			}
-		}
-	*/
 }
-
-/*
-
-func (image *DrawingImage) AquireData(im image.Image) {
-	i := 0
-	bitmapArray := image.Pix
-	for y := im.Bounds().Min.Y; y != im.Bounds().Max.Y; y++ {
-		for x := im.Bounds().Min.X; x != im.Bounds().Max.X; x++ {
-			r, g, b, a := im.At(x, y).RGBA()
-			bitmapArray[i+0] = byte(b >> 8)
-			bitmapArray[i+1] = byte(g >> 8)
-			bitmapArray[i+2] = byte(r >> 8)
-			bitmapArray[i+3] = byte(a >> 8)
-			i += 4
-		}
-	}
-}
-*/
 
 func (image *DrawingImage) SizeOnDisk() (asString string, available bool) {
 	if image.sizeOnDisk > 0 {
@@ -141,85 +108,4 @@ func (image *DrawingImage) LastSaved() (asString string, available bool) {
 		return image.lastSaved, true
 	}
 	return "", false
-}
-
-// DrawImage draws image
-func DrawImage(g *Graphics, image *DrawingImage, x, y int) {
-	/*
-		width := 100
-		height := 100
-
-		var bi win.BITMAPV5HEADER
-		bi.BiSize = uint32(unsafe.Sizeof(bi))
-		bi.BiWidth = int32(width)
-		bi.BiHeight = -int32(height)
-		bi.BiPlanes = 1
-		bi.BiBitCount = 32
-		bi.BiCompression = win.BI_BITFIELDS
-		// The following mask specification specifies a supported 32 BPP
-		// alpha format for Windows XP.
-		bi.BV4RedMask = 0x00FF0000
-		bi.BV4GreenMask = 0x0000FF00
-		bi.BV4BlueMask = 0x000000FF
-		bi.BV4AlphaMask = 0xFF000000
-
-		hdc := win.GetDC(0)
-		defer win.ReleaseDC(0, hdc)
-
-		var lpBits unsafe.Pointer
-		// Create the DIB section with an alpha channel.
-		hbitmap := win.CreateDIBSection(hdc, &bi.BITMAPINFOHEADER, win.DIB_RGB_COLORS, &lpBits, 0, 0)
-
-		bitsPerPixel := 32
-		length := ((width*bitsPerPixel + 31) / 32) * 4 * height
-		// Slice memory layout
-		var sl = struct {
-			addr uintptr
-			len  int
-			cap  int
-		}{uintptr(lpBits), length, length}
-
-		// Use unsafe to turn sl into a []byte.
-		bitmapArray := *(*[]byte)(unsafe.Pointer(&sl))
-
-		i := 0
-		for y := 0; y != height; y++ {
-			for x := 0; x != width; x++ {
-				bitmapArray[i+3] = 255
-				bitmapArray[i+2] = 255
-				bitmapArray[i+1] = 0
-				bitmapArray[i+0] = 0
-				i += 4
-			}
-		}
-
-		memDC := win.CreateCompatibleDC(g.GetHDC())
-		win.SelectObject(memDC, win.HGDIOBJ(hbitmap))
-
-		gbitmap := NewGraphics(memDC)
-		gbitmap.DrawLine(10, 10, 100, 100, Rgb(0, 255, 0))
-
-		win.BitBlt(g.GetHDC(), 0, 0, int32(width), int32(height), memDC, 0, 0, win.SRCCOPY)
-
-		win.DeleteObject(win.HGDIOBJ(hbitmap))
-	*/
-
-	var bf win.BLENDFUNCTION
-	bf.BlendOp = AC_SRC_OVER
-	bf.BlendFlags = 0
-	bf.SourceConstantAlpha = 255
-	bf.AlphaFormat = win.AC_SRC_ALPHA
-
-	memDC := win.CreateCompatibleDC(0)
-	prevObj := win.SelectObject(memDC, win.HGDIOBJ(image.hbitmap))
-
-	width := int32(image.Width())
-	height := int32(image.Height())
-
-	//win.BitBlt(g.GetHDC(), 0, 0, int32(width), int32(height), memDC, 0, 0, win.SRCCOPY)
-	win.AlphaBlend(g.GetHDC(), int32(x), int32(y), width, height, memDC, 0, 0, width, height, bf)
-
-	win.SelectObject(memDC, prevObj)
-	win.DeleteDC(memDC)
-
 }

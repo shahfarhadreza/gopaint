@@ -431,17 +431,17 @@ func (sec *RibbonSection) drawButtons(g *Graphics) {
 			// Small color button
 			if size == RibbonButtonSizeSmall && button.image == nil {
 				if button.hasState(RibbonButtonStateHot) {
-					g.DrawFillRectangle(&rectButton, NewRgb(100, 165, 231), NewRgb(255, 255, 255))
+					g.FillRectangle(&rectButton, NewRgb(100, 165, 231), NewRgb(255, 255, 255))
 				} else {
-					g.DrawFillRectangle(&rectButton, &button.border, NewRgb(255, 255, 255))
+					g.FillRectangle(&rectButton, &button.border, NewRgb(255, 255, 255))
 				}
 			} else {
 				// Draw hover highlight/toggled
 				if button.hasState(RibbonButtonStateChecked) {
-					g.DrawFillRectangle(&rectButton, NewRgb(98, 162, 228), NewRgb(201, 224, 247))
+					g.FillRectangle(&rectButton, NewRgb(98, 162, 228), NewRgb(201, 224, 247))
 					if button.splitDropDown {
 						rectUpper := button.splitRects[0]
-						g.DrawFillRectangle(&rectUpper, NewRgb(98, 162, 228), NewRgb(201, 224, 247))
+						g.FillRectangle(&rectUpper, NewRgb(98, 162, 228), NewRgb(201, 224, 247))
 					}
 				}
 				if button.hasState(RibbonButtonStateHot) {
@@ -451,16 +451,16 @@ func (sec *RibbonSection) drawButtons(g *Graphics) {
 							if button.splitStateIndex == 0 {
 								rectUpper := button.splitRects[0]
 								rectLower := button.splitRects[1]
-								g.DrawFillRectangle(&rectLower, NewRgb(147, 190, 234), NewRgb(245, 246, 247))
-								g.DrawFillRectangle(&rectUpper, NewRgb(122, 176, 231), NewRgb(213, 230, 247))
+								g.FillRectangle(&rectLower, NewRgb(147, 190, 234), NewRgb(245, 246, 247))
+								g.FillRectangle(&rectUpper, NewRgb(122, 176, 231), NewRgb(213, 230, 247))
 							} else {
 								rectUpper := button.splitRects[0]
 								rectLower := button.splitRects[1]
-								g.DrawFillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
-								g.DrawFillRectangle(&rectUpper, NewRgb(122, 176, 231), NewRgb(213, 230, 247))
+								g.FillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
+								g.FillRectangle(&rectUpper, NewRgb(122, 176, 231), NewRgb(213, 230, 247))
 							}
 						} else {
-							g.DrawFillRectangle(&rectButton, NewRgb(122, 176, 231), NewRgb(213, 230, 247))
+							g.FillRectangle(&rectButton, NewRgb(122, 176, 231), NewRgb(213, 230, 247))
 						}
 					} else {
 						if button.splitDropDown {
@@ -469,27 +469,27 @@ func (sec *RibbonSection) drawButtons(g *Graphics) {
 								if button.splitStateIndex == 0 {
 									rectUpper := button.splitRects[0]
 									rectLower := button.splitRects[1]
-									g.DrawFillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(245, 246, 247))
-									g.DrawFillRectangle(&rectUpper, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
+									g.FillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(245, 246, 247))
+									g.FillRectangle(&rectUpper, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
 								} else {
 									rectUpper := button.splitRects[0]
 									rectLower := button.splitRects[1]
-									g.DrawFillRectangle(&rectUpper, NewRgb(164, 206, 249), NewRgb(245, 246, 247))
-									g.DrawFillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
+									g.FillRectangle(&rectUpper, NewRgb(164, 206, 249), NewRgb(245, 246, 247))
+									g.FillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
 								}
 							} else {
 								rectUpper := button.splitRects[0]
 								rectLower := button.splitRects[1]
 								if button.splitStateIndex == 0 {
-									g.DrawFillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(245, 246, 247))
+									g.FillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(245, 246, 247))
 								} else {
-									g.DrawFillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
+									g.FillRectangle(&rectLower, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
 								}
 								g.DrawRectangle(&rectUpper, NewRgb(196, 211, 226))
 							}
 						} else {
 							if button.enabled {
-								g.DrawFillRectangle(&rectButton, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
+								g.FillRectangle(&rectButton, NewRgb(164, 206, 249), NewRgb(232, 239, 247))
 							}
 						}
 					}
@@ -498,12 +498,12 @@ func (sec *RibbonSection) drawButtons(g *Graphics) {
 					if button.splitDropDown {
 						// if clicked on upper
 						if button.splitStateIndex == 0 {
-							g.DrawFillRectangle(&button.splitRects[0], NewRgb(98, 162, 228), NewRgb(201, 224, 247))
+							g.FillRectangle(&button.splitRects[0], NewRgb(98, 162, 228), NewRgb(201, 224, 247))
 						} else {
-							g.DrawFillRectangle(&button.splitRects[1], NewRgb(98, 162, 228), NewRgb(201, 224, 247))
+							g.FillRectangle(&button.splitRects[1], NewRgb(98, 162, 228), NewRgb(201, 224, 247))
 						}
 					} else {
-						g.DrawFillRectangle(&rectButton, NewRgb(98, 162, 228), NewRgb(201, 224, 247))
+						g.FillRectangle(&rectButton, NewRgb(98, 162, 228), NewRgb(201, 224, 247))
 					}
 				}
 			}
@@ -514,7 +514,7 @@ func (sec *RibbonSection) drawButtons(g *Graphics) {
 				g.DrawBitmapImageCenter(button.image, &rectButton, !button.enabled)
 			} else {
 				rectButton.Inflate(-2, -2)
-				g.DrawFillRectangle(&rectButton, &button.color, &button.color)
+				g.FillRectangle(&rectButton, &button.color, &button.color)
 			}
 		} else if size == RibbonButtonSizeBig {
 			// Draw button with a image
@@ -528,9 +528,9 @@ func (sec *RibbonSection) drawButtons(g *Graphics) {
 				rectButton.Right -= 6
 				width := rectButton.Width()
 				rectButton.Bottom = rectButton.Top + width // height = width, keep it square
-				g.DrawFillRectangle(&rectButton, &button.border, NewRgb(255, 255, 255))
+				g.FillRectangle(&rectButton, &button.border, NewRgb(255, 255, 255))
 				rectButton.Inflate(-2, -2)
-				g.DrawFillRectangle(&rectButton, &button.color, &button.color)
+				g.FillRectangle(&rectButton, &button.color, &button.color)
 			}
 			//  draw the caption at bottom
 			rectLower := button.splitRects[1]
@@ -654,7 +654,7 @@ func (ribbon *ribbonData) paint(gOrg *Graphics, rc *Rect) {
 	if ribbon.appMenuState == 1 {
 		appMenuColor = Rgb(41, 140, 225)
 	}
-	g.DrawFillRectangle(&ribbon.rectAppMenu, &appMenuColor, &appMenuColor)
+	g.FillRectangle(&ribbon.rectAppMenu, &appMenuColor, &appMenuColor)
 	g.DrawText(ribbon.appMenuCaption, &ribbon.rectAppMenu, win.DT_CENTER|win.DT_VCENTER|win.DT_SINGLELINE, NewRgb(255, 255, 255), font)
 
 	// Draw all the tab headers with their captions

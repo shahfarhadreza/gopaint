@@ -35,19 +35,19 @@ type DrawingCanvas struct {
 
 func NewDrawingCanvas(parent Window) *DrawingCanvas {
 	canvas := &DrawingCanvas{Window: NewWindow()}
-	canvas.init(parent)
+	canvas.Init(parent)
 	return canvas
 }
 
-func (canvas *DrawingCanvas) init(parent Window) {
+func (canvas *DrawingCanvas) Init(parent Window) {
 	logInfo("initializing canvas...")
 	canvas.firstMove = true
 	canvas.gridPen = NewDashPen(1, NewRgb(120, 120, 120))
 	canvas.Create("", win.WS_CHILD|win.WS_VISIBLE|win.WS_CLIPCHILDREN, 10, 10, 10, 10, parent)
-	canvas.SetPaintEventHandler(canvas.paint)
-	canvas.SetMouseMoveEventHandler(canvas.mouseMove)
-	canvas.SetMouseDownEventHandler(canvas.mouseDown)
-	canvas.SetMouseUpEventHandler(canvas.mouseUp)
+	canvas.SetPaintEventHandler(canvas.Paint)
+	canvas.SetMouseMoveEventHandler(canvas.MouseMove)
+	canvas.SetMouseDownEventHandler(canvas.MouseDown)
+	canvas.SetMouseUpEventHandler(canvas.MouseUp)
 	canvas.SetMouseWheelEventHandler(func(e *MouseWheelEvent) {
 		work := mainWindow.workspace
 		if e.WheelDelta > 0 {
@@ -72,8 +72,8 @@ func (canvas *DrawingCanvas) init(parent Window) {
 			tool.keyPressEvent(&e)
 		}
 	})
-	canvas.SetSetCursorEventHandler(canvas.updateCursor)
-	canvas.SetResizeEventHandler(canvas.onResize)
+	canvas.SetSetCursorEventHandler(canvas.UpdateCursor)
+	canvas.SetResizeEventHandler(canvas.OnResize)
 	logInfo("Done initializing canvas")
 }
 
@@ -97,7 +97,7 @@ func (canvas *DrawingCanvas) Dispose() {
 	}
 }
 
-func (canvas *DrawingCanvas) updateCursor() bool {
+func (canvas *DrawingCanvas) UpdateCursor() bool {
 	tool := mainWindow.tools.GetCurrentTool()
 	if tool != nil {
 		var winpt win.POINT
@@ -138,7 +138,7 @@ func (canvas *DrawingCanvas) NewImage(width, height int) {
 	}
 	canvas.image = newImage
 	canvas.SetSize(width, height)
-	canvas.updateStatus()
+	canvas.UpdateStatus()
 }
 
 func (canvas *DrawingCanvas) Resize(width, height int) {
@@ -154,7 +154,7 @@ func (canvas *DrawingCanvas) Resize(width, height int) {
 	// We allocate new data with given new size
 	// then we copy/draw the old data/image into it
 	newImage := NewDrawingImage(width, height)
-	color := getColorBackground()
+	color := GetColorBackground()
 	newImage.Clear(&color)
 
 	rect2 := canvas.image.Bounds()
@@ -168,7 +168,7 @@ func (canvas *DrawingCanvas) Resize(width, height int) {
 	canvas.image = newImage
 
 	canvas.SetSize(width, height)
-	canvas.updateStatus()
+	canvas.UpdateStatus()
 }
 
 func (canvas *DrawingCanvas) OpenImage(filename string) bool {
@@ -220,7 +220,7 @@ func (canvas *DrawingCanvas) OpenImage(filename string) bool {
 	}
 	canvas.image = newImage
 	canvas.SetSize(width, height)
-	canvas.updateStatus()
+	canvas.UpdateStatus()
 	canvas.Repaint()
 	log.Println("Done opening image")
 	return true
@@ -247,7 +247,7 @@ func (canvas *DrawingCanvas) SaveImage(filePath string) bool {
 	return true
 }
 
-func (canvas *DrawingCanvas) updateStatus() {
+func (canvas *DrawingCanvas) UpdateStatus() {
 	size := canvas.GetSize()
 	scz := mainWindow.statusCanvasSize
 	if scz != nil {
@@ -263,7 +263,7 @@ func (canvas *DrawingCanvas) updateStatus() {
 	}
 }
 
-func (canvas *DrawingCanvas) updateMousePosStatus() {
+func (canvas *DrawingCanvas) UpdateMousePosStatus() {
 	status := mainWindow.statusMousePos
 	wndRect := canvas.GetWindowRect()
 	ptScreen := app.GetCursorPos()
@@ -276,7 +276,7 @@ func (canvas *DrawingCanvas) updateMousePosStatus() {
 	}
 }
 
-func (canvas *DrawingCanvas) mouseDown(pt *Point, mbutton int) {
+func (canvas *DrawingCanvas) MouseDown(pt *Point, mbutton int) {
 	win.SetCapture(canvas.GetHandle())
 	tool := mainWindow.tools.GetCurrentTool()
 	if canvas.firstMove {
@@ -297,7 +297,7 @@ func (canvas *DrawingCanvas) mouseDown(pt *Point, mbutton int) {
 	canvas.lastPt = *pt
 }
 
-func (canvas *DrawingCanvas) mouseUp(pt *Point, mbutton int) {
+func (canvas *DrawingCanvas) MouseUp(pt *Point, mbutton int) {
 	tool := mainWindow.tools.GetCurrentTool()
 	if canvas.firstMove {
 		canvas.lastPt = *pt
@@ -317,7 +317,7 @@ func (canvas *DrawingCanvas) mouseUp(pt *Point, mbutton int) {
 	win.ReleaseCapture()
 }
 
-func (canvas *DrawingCanvas) mouseMove(mousepoint *Point, mbutton int) {
+func (canvas *DrawingCanvas) MouseMove(mousepoint *Point, mbutton int) {
 	pt := *mousepoint
 	tool := mainWindow.tools.GetCurrentTool()
 	if canvas.firstMove {
@@ -333,12 +333,12 @@ func (canvas *DrawingCanvas) mouseMove(mousepoint *Point, mbutton int) {
 		canvas:  canvas,
 	}
 	tool.mouseMoveEvent(&e)
-	canvas.updateMousePosStatus()
+	canvas.UpdateMousePosStatus()
 	canvas.RepaintVisible()
 	canvas.lastPt = pt
 }
 
-func (canvas *DrawingCanvas) onResize(rect *Rect) {
+func (canvas *DrawingCanvas) OnResize(rect *Rect) {
 	logInfo("canvas resize...")
 	if canvas.mhdc != 0 {
 		win.DeleteDC(canvas.mhdc)
@@ -408,7 +408,7 @@ func (canvas *DrawingCanvas) RepaintVisible() {
 	canvas.InvalidateRect(&rect, false)
 }
 
-func (canvas *DrawingCanvas) drawGridLines(g *Graphics, rect *Rect, rcVisible *Rect) {
+func (canvas *DrawingCanvas) DrawGridLines(g *Graphics, rect *Rect, rcVisible *Rect) {
 	g.SelectObject(canvas.gridPen)
 	for x := 10; x <= rect.Right; x += 10 {
 		if x > rcVisible.Left && x < rcVisible.Right {
@@ -422,7 +422,7 @@ func (canvas *DrawingCanvas) drawGridLines(g *Graphics, rect *Rect, rcVisible *R
 	}
 }
 
-func (canvas *DrawingCanvas) paint(g *Graphics, rect *Rect) {
+func (canvas *DrawingCanvas) Paint(g *Graphics, rect *Rect) {
 	if canvas.context == nil {
 		return
 	}
@@ -440,7 +440,7 @@ func (canvas *DrawingCanvas) paint(g *Graphics, rect *Rect) {
 	//image.memdc, rcVisible.Left, rcVisible.Top, rcVisible.Width(), rcVisible.Height())
 
 	if mainWindow.bShowGridlines.IsToggled() {
-		canvas.drawGridLines(gmem, rect, &rcVisible)
+		canvas.DrawGridLines(gmem, rect, &rcVisible)
 	}
 
 	var winpt win.POINT

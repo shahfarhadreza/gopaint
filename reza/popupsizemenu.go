@@ -132,12 +132,12 @@ func (menu *popupSizeMenuData) drawItems(g *Graphics, rect *Rect) {
 		rcHover.Bottom--
 		if item.IsHighlighted() {
 			if item.IsToggled() {
-				g.DrawFillRectangle(&rcHover, NewRgb(125, 179, 234), NewRgb(219, 235, 252))
+				g.FillRectangle(&rcHover, NewRgb(125, 179, 234), NewRgb(219, 235, 252))
 			} else {
-				g.DrawFillRectangle(&rcHover, NewRgb(168, 210, 253), NewRgb(237, 244, 252))
+				g.FillRectangle(&rcHover, NewRgb(168, 210, 253), NewRgb(237, 244, 252))
 			}
 		} else if item.IsToggled() {
-			g.DrawFillRectangle(&rcHover, NewRgb(100, 165, 230), NewRgb(206, 229, 252))
+			g.FillRectangle(&rcHover, NewRgb(100, 165, 230), NewRgb(206, 229, 252))
 		}
 		centerY := prect.CenterY()
 		rcLine := *prect // copy
@@ -151,7 +151,7 @@ func (menu *popupSizeMenuData) drawItems(g *Graphics, rect *Rect) {
 			rcLine.Top -= halfSize
 			rcLine.Bottom -= halfSize
 		}
-		g.DrawFillRectangle(&rcLine, NewRgb(0, 0, 0), NewRgb(0, 0, 0))
+		g.FillRectangle(&rcLine, NewRgb(0, 0, 0), NewRgb(0, 0, 0))
 	}
 }
 

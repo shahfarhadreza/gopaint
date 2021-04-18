@@ -79,14 +79,14 @@ func (tool *ToolShape) draw(e *ToolDrawEvent) {
 		}, gdiplus.Point{
 			X: int32(tool.endPoint.X), Y: int32(tool.endPoint.Y),
 		}
-		startPoint, endPoint := getStartAndEnd(tool.startPoint, tool.endPoint)
+		startPoint, endPoint := GetStartAndEnd(tool.startPoint, tool.endPoint)
 		rect := gdiplus.Rect{
 			X:      startPoint.X,
 			Y:      startPoint.Y,
 			Width:  endPoint.X - startPoint.X,
 			Height: endPoint.Y - startPoint.Y,
 		}
-		pen, brush := getPenAndBrush(mbutton, float32(tool.strokeWidth))
+		pen, brush := GetPenAndBrush(mbutton, float32(tool.strokeWidth))
 		if pen == nil && brush == nil {
 			return
 		}
@@ -140,14 +140,14 @@ func (tool *ToolShape) mouseUpEvent(e *ToolMouseEvent) {
 			}, gdiplus.Point{
 				X: int32(tool.endPoint.X), Y: int32(tool.endPoint.Y),
 			}
-			startPoint, endPoint := getStartAndEnd(tool.startPoint, tool.endPoint)
+			startPoint, endPoint := GetStartAndEnd(tool.startPoint, tool.endPoint)
 			rect := gdiplus.Rect{
 				X:      startPoint.X,
 				Y:      startPoint.Y,
 				Width:  endPoint.X - startPoint.X,
 				Height: endPoint.Y - startPoint.Y,
 			}
-			pen, brush := getPenAndBrush(mbutton, float32(tool.strokeWidth))
+			pen, brush := GetPenAndBrush(mbutton, float32(tool.strokeWidth))
 			if pen == nil && brush == nil {
 				return
 			}

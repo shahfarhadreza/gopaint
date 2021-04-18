@@ -56,7 +56,7 @@ func (tool *ToolEraser) mouseDownEvent(e *ToolMouseEvent) {
 	x := float64(e.pt.X)
 	y := float64(e.pt.Y)
 	if mbutton == MouseButtonLeft {
-		color := getColorBackground()
+		color := GetColorBackground()
 		gc.SetRGBA255(int(color.GetB()), int(color.GetG()), int(color.GetR()), int(color.GetA()))
 		gc.DrawPoint(x, y, (float64(tool.size)/2.0)-0.1)
 		gc.Fill()
@@ -71,7 +71,7 @@ func (tool *ToolEraser) mouseMoveEvent(e *ToolMouseEvent) {
 	lastX := float64(e.lastPt.X)
 	lastY := float64(e.lastPt.Y)
 	if mbutton == MouseButtonLeft {
-		color := getColorBackground()
+		color := GetColorBackground()
 		gc.SetRGBA255(int(color.GetB()), int(color.GetG()), int(color.GetR()), int(color.GetA()))
 		gc.SetLineWidth(float64(tool.size))
 		gc.MoveTo(lastX, lastY)

@@ -129,7 +129,7 @@ func (tool *ToolBucket) mouseDownEvent(e *ToolMouseEvent) {
 	x := e.pt.X
 	y := e.pt.Y
 	clickedPixel := image.GetColorAt(x, y)
-	c := getColorForeBack(mbutton)
+	c := GetColorForeBack(mbutton)
 	floodWith := Rgba(c.GetR(), c.GetG(), c.GetB(), c.GetA())
 	floodFillScanline(image, Point{X: x, Y: y}, clickedPixel, floodWith)
 }

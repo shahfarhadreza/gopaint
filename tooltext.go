@@ -93,8 +93,8 @@ func (tool *ToolText) newTextEditAt(pt *Point) {
 func (tool *ToolText) draw(e *ToolDrawEvent) {
 	g := e.gdi32
 	graphics := e.graphics
-	gdicolor := getColorForeground()
-	color := fromGdiplusColor(&gdicolor)
+	gdicolor := GetColorForeground()
+	color := FromGdiplusColor(&gdicolor)
 	textEdit := tool.textEdit
 
 	if textEdit == nil {
@@ -136,7 +136,7 @@ func (tool *ToolText) finalizeText() {
 	g := mainWindow.workspace.canvas.image.context
 	textEdit := tool.textEdit
 	if !textEdit.IsEmpty() {
-		gdicolor := getColorForeground()
+		gdicolor := GetColorForeground()
 		text := textEdit.GetText()
 		brush := gdiplus.NewSolidBrush(&gdicolor)
 		lrect := &gdiplus.RectF{X: float32(tool.textArea.Left), Y: float32(tool.textArea.Top), Width: 0, Height: 0}

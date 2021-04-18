@@ -58,7 +58,7 @@ func (tool *ToolPencil) mouseMoveEvent(e *ToolMouseEvent) {
 	lastX := float64(e.lastPt.X)
 	lastY := float64(e.lastPt.Y)
 	if mbutton == MouseButtonLeft || mbutton == MouseButtonRight {
-		color := getColorForeBack(mbutton)
+		color := GetColorForeBack(mbutton)
 		gc.SetRGBA255(int(color.GetB()), int(color.GetG()), int(color.GetR()), int(color.GetA()))
 		gc.SetLineWidth(float64(tool.size))
 		gc.MoveTo(lastX+0.5, lastY+0.5)
@@ -75,7 +75,7 @@ func (tool *ToolPencil) mouseDownEvent(e *ToolMouseEvent) {
 	lastX := float64(e.lastPt.X)
 	lastY := float64(e.lastPt.Y)
 	if mbutton == MouseButtonLeft || mbutton == MouseButtonRight {
-		color := getColorForeBack(mbutton)
+		color := GetColorForeBack(mbutton)
 		gc.SetRGBA255(int(color.GetB()), int(color.GetG()), int(color.GetR()), int(color.GetA()))
 		gc.SetLineWidth(float64(tool.size))
 		gc.MoveTo(lastX+0.5, lastY+0.5)

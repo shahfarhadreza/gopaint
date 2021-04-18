@@ -70,20 +70,21 @@ func (work *Workspace) init(parent Window) {
 	work.SetHScrollEventHandler(work.hscroll)
 	work.SetVScrollEventHandler(work.vscroll)
 
-	color := Rgb(255, 0, 0)
+	color := Rgb(255, 255, 255)
+	brushWhite := win.HBRUSH(win.GetStockObject(win.WHITE_BRUSH))
 
 	work.resizePreview = NewWindow()
 	work.resizePreview.CreateEx("", win.WS_POPUP, win.WS_EX_LAYERED, 10, 10, 700, 100, work)
 	work.resizePreview.SetPaintEventHandler(func(g *Graphics, rect *Rect) {
-		g.FillRect(rect, &color)
+		wrect := rect.AsRECT()
+		FillRect(g.GetHDC(), &wrect, brushWhite)
 		g.DrawDashedRectangle(rect, NewRgb(0, 0, 0))
 	})
 	SetLayeredWindowAttributes(work.resizePreview.GetHandle(), color.AsCOLORREF(), 0, LWA_COLORKEY)
 
 	work.canvas = NewDrawingCanvas(work)
-	work.canvas.NewImage(2000, 2000)
+	work.canvas.NewImage(1920, 1080)
 	//work.canvas.OpenImage(".\\images\\cloudy.jpg")
-
 	// test
 	//work.canvas.Resize(1100, 620)
 	logInfo("Done initializing workspace")
@@ -388,8 +389,8 @@ func (work *Workspace) paint(gOrg *Graphics, rect *Rect) {
 
 	work.calculateResizeHandles(&rectCanvas)
 
-	g.DrawFillRectangle(&work.rcBoxBottom, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
-	g.DrawFillRectangle(&work.rcBoxRight, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
-	g.DrawFillRectangle(&work.rcBoxCorner, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
+	g.FillRectangle(&work.rcBoxBottom, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
+	g.FillRectangle(&work.rcBoxRight, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
+	g.FillRectangle(&work.rcBoxCorner, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
 
 }

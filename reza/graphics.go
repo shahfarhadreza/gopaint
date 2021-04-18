@@ -47,11 +47,32 @@ type Graphics struct {
 	hdc win.HDC
 }
 
-// BitmapImage is struct contains data for a image
+// BitmapImage is struct contains data for a image along with a disabled version of it :D
 type BitmapImage struct {
 	Width, Height int
 	bitmapGray    win.HBITMAP
 	bitmap        win.HBITMAP
+}
+
+type BitmapGraphics struct {
+	HBitmap  win.HBITMAP
+	Hdc      win.HDC
+	Graphics *Graphics
+	Data     []uint8
+}
+
+type GdiObject interface {
+	GetGdiObject() win.HGDIOBJ
+}
+
+type Brush struct {
+	GdiObject
+	NativeBrush win.HBRUSH
+}
+
+type Pen struct {
+	GdiObject
+	NativePen win.HPEN
 }
 
 // AsCOLORREF returns all the color values together as type 'win.COLORREF'
@@ -69,12 +90,12 @@ func (c *Color) AsString() string {
 }
 
 // IsEqualTo compares two colors
-func (c *Color) IsEqualTo(c2 Color) bool {
+func (c *Color) IsEqualTo(c2 *Color) bool {
 	return (c.R == c2.R && c.G == c2.G && c.B == c2.B && c.A == c2.A)
 }
 
-func IsEqualColor(c Color, c2 Color) bool {
-	return (c.R == c2.R && c.G == c2.G && c.B == c2.B && c.A == c2.A)
+func IsEqualColors(c *Color, c2 *Color) bool {
+	return c.IsEqualTo(c2)
 }
 
 // FromCOLORREF converts win.COLORREF to Color
@@ -218,16 +239,13 @@ func Rgba(r byte, g byte, b byte, a byte) Color {
 	return Color{RGBA: color.RGBA{R: byte(r), G: byte(g), B: byte(b), A: byte(a)}}
 }
 
-type BitmapGraphics struct {
-	HBitmap  win.HBITMAP
-	Hdc      win.HDC
-	Graphics *Graphics
-	Data     []uint8
+func NewRgba(r byte, g byte, b byte, a byte) *Color {
+	return &Color{RGBA: color.RGBA{R: byte(r), G: byte(g), B: byte(b), A: byte(a)}}
 }
 
 func NewBitmapGraphics(width, height int) *BitmapGraphics {
 	var bi win.BITMAPV5HEADER
-	const bitsPerPixel = 32 // We only work with 32 bit (BGRA)
+	const bitsPerPixel = 32 // We only work with 32 bit (RGBA)
 	bi.BiSize = uint32(unsafe.Sizeof(bi))
 	bi.BiWidth = int32(width)
 	bi.BiHeight = -int32(height)
@@ -435,33 +453,19 @@ func (img *BitmapImage) Dispose() {
 	img.bitmapGray = 0
 }
 
-type GdiObject interface {
-	GetGdiObject() win.HGDIOBJ
-}
-
-type Brush struct {
-	GdiObject
-	hbrush win.HBRUSH
-}
-
 func NewSolidBrush(color *Color) *Brush {
 	gdiBrush := &Brush{}
 	lb := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: color.AsCOLORREF()}
-	gdiBrush.hbrush = win.CreateBrushIndirect(lb)
+	gdiBrush.NativeBrush = win.CreateBrushIndirect(lb)
 	return gdiBrush
 }
 
 func (b *Brush) Dispose() {
-	win.DeleteObject(win.HGDIOBJ(b.hbrush))
+	win.DeleteObject(win.HGDIOBJ(b.NativeBrush))
 }
 
 func (b *Brush) GetGdiObject() win.HGDIOBJ {
-	return win.HGDIOBJ(b.hbrush)
-}
-
-type Pen struct {
-	GdiObject
-	NativePen win.HPEN
+	return win.HGDIOBJ(b.NativeBrush)
 }
 
 func NewPen(style int, width int, color *Color) *Pen {
@@ -510,21 +514,39 @@ func (g *Graphics) GetHDC() win.HDC {
 	return g.hdc
 }
 
+func (g *Graphics) SelectObject(obj GdiObject) (prev win.HGDIOBJ) {
+	prev = win.SelectObject(g.hdc, obj.GetGdiObject())
+	return
+}
+
+func (g *Graphics) SelectBrushAndPen(pen *Pen, brush *Brush) {
+	if pen == nil {
+		win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_PEN)))
+	} else {
+		g.SelectObject(pen)
+	}
+	if brush == nil {
+		win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
+	} else {
+		g.SelectObject(brush)
+	}
+}
+
 func (g *Graphics) BitBlt(x, y, width, height int, hdcSrc win.HDC, xSrc, ySrc int, op uint) {
 	win.BitBlt(g.GetHDC(),
-		int32(x), int32(y),
-		int32(width), int32(height),
-		hdcSrc,
+		int32(x), int32(y), int32(width), int32(height), hdcSrc,
 		int32(xSrc), int32(ySrc), uint32(op))
 }
 
-func (g *Graphics) AlphaBlend(x, y, width, height int, hdcSrc win.HDC, xSrc, ySrc, widthSrc, heightSrc int) {
+func (g *Graphics) AlphaBlend(x, y, width, height int, hdcSrc win.HDC, xSrc, ySrc, widthSrc, heightSrc int, alpha byte) {
 	var bf win.BLENDFUNCTION
 	bf.BlendOp = AC_SRC_OVER
 	bf.BlendFlags = 0
-	bf.SourceConstantAlpha = 255
+	bf.SourceConstantAlpha = alpha
 	bf.AlphaFormat = win.AC_SRC_ALPHA
-	win.AlphaBlend(g.GetHDC(), int32(x), int32(y), int32(width), int32(height), hdcSrc, int32(xSrc), int32(ySrc), int32(widthSrc), int32(heightSrc), bf)
+	win.AlphaBlend(g.GetHDC(),
+		int32(x), int32(y), int32(width), int32(height), hdcSrc,
+		int32(xSrc), int32(ySrc), int32(widthSrc), int32(heightSrc), bf)
 }
 
 // DrawBitmapImage draws image
@@ -534,7 +556,6 @@ func (g *Graphics) DrawBitmapImage(image *BitmapImage, x, y int, gray bool) {
 	bf.BlendFlags = 0
 	bf.SourceConstantAlpha = 255
 	bf.AlphaFormat = win.AC_SRC_ALPHA
-
 	bitmap := image.bitmap
 	if gray {
 		bitmap = image.bitmapGray
@@ -543,15 +564,11 @@ func (g *Graphics) DrawBitmapImage(image *BitmapImage, x, y int, gray bool) {
 		}
 		bf.SourceConstantAlpha = 180
 	}
-
 	memDC := win.CreateCompatibleDC(0)
 	prevObj := win.SelectObject(memDC, win.HGDIOBJ(bitmap))
-
 	//win.BitBlt(hdc, 0, 0, int32(canvas.image.width), int32(canvas.image.height), memDC, 0, 0, win.SRCCOPY)
-
 	win.AlphaBlend(g.hdc, int32(x), int32(y), int32(image.Width), int32(image.Height), memDC,
 		0, 0, int32(image.Width), int32(image.Height), bf)
-
 	win.SelectObject(memDC, prevObj)
 	win.DeleteDC(memDC)
 }
@@ -624,9 +641,9 @@ func (g *Graphics) DrawCheckerBoard(rect *Rect, size int, color1, color2 *Color)
 				Bottom: cy + checkSize,
 			}
 			if (x+y)%2 == 0 {
-				g.DrawFillRectangleEx(&rectCheck, pen2, brush2)
+				g.FillRectangleEx(&rectCheck, pen2, brush2)
 			} else {
-				g.DrawFillRectangleEx(&rectCheck, pen1, brush1)
+				g.FillRectangleEx(&rectCheck, pen1, brush1)
 			}
 		}
 	}
@@ -642,54 +659,15 @@ func (g *Graphics) DrawLine(x, y, x2, y2 int, color *Color) {
 }
 
 func (g *Graphics) DrawLineEx(x, y, x2, y2 int, pen *Pen) {
-	if pen == nil {
-		win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_PEN)))
-	} else {
-		win.SelectObject(g.hdc, win.HGDIOBJ(pen.NativePen))
+	if pen != nil {
+		win.MoveToEx(g.hdc, x, y, nil)
+		win.LineTo(g.hdc, int32(x2), int32(y2))
 	}
-	win.MoveToEx(g.hdc, x, y, nil)
-	win.LineTo(g.hdc, int32(x2), int32(y2))
 }
 
 func (g *Graphics) DrawLineOnly(x, y, x2, y2 int) {
 	win.MoveToEx(g.hdc, x, y, nil)
 	win.LineTo(g.hdc, int32(x2), int32(y2))
-}
-
-// FillRect fills the given rectangle with the specified color
-func (g *Graphics) FillRect(rc *Rect, color *Color) {
-	brush := NewSolidBrush(color)
-	defer brush.Dispose()
-	wrect := rc.AsRECT()
-	FillRect(g.GetHDC(), &wrect, brush.hbrush)
-}
-
-// DrawFillRectangle draws a rectangle filled and bordered with the given colors
-func (g *Graphics) DrawFillRectangleEx(rc *Rect, pen *Pen, brush *Brush) {
-	win.SelectObject(g.hdc, win.HGDIOBJ(pen.NativePen))
-	win.SelectObject(g.hdc, win.HGDIOBJ(brush.hbrush))
-	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
-}
-
-// DrawFillRectangle draws a rectangle filled and bordered with the given colors
-func (g *Graphics) DrawFillRectangle(rc *Rect, borderColor, fillColor *Color) {
-	if borderColor == fillColor {
-		g.FillRect(rc, fillColor)
-		return
-	}
-	pbrush := &win.LOGBRUSH{LbStyle: win.PS_SOLID, LbColor: borderColor.AsCOLORREF()}
-	pen := win.ExtCreatePen(win.PS_SOLID, 1, pbrush, 0, nil)
-	defer win.DeleteObject(win.HGDIOBJ(pen))
-	previousPen := win.SelectObject(g.hdc, win.HGDIOBJ(pen))
-	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousPen))
-
-	lb := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: fillColor.AsCOLORREF()}
-	brush := win.CreateBrushIndirect(lb)
-	defer win.DeleteObject(win.HGDIOBJ(brush))
-	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(brush))
-	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
-
-	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
 }
 
 // DrawRectangle draws a rectangle bordered with the given color
@@ -702,17 +680,6 @@ func (g *Graphics) DrawRectangle(rc *Rect, color *Color) {
 	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
 	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
 	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
-}
-
-func (g *Graphics) DrawRoundRectangle(rc *Rect, cornerWidth, cornerHeight int, color *Color) {
-	pbrush := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: color.AsCOLORREF()}
-	pen := win.ExtCreatePen(win.PS_SOLID, 1, pbrush, 0, nil)
-	defer win.DeleteObject(win.HGDIOBJ(pen))
-	previousPen := win.SelectObject(g.hdc, win.HGDIOBJ(pen))
-	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousPen))
-	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
-	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
-	win.RoundRect(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom), int32(cornerWidth), int32(cornerHeight))
 }
 
 func (g *Graphics) DrawDashedRectangle(rc *Rect, color *Color) {
@@ -728,6 +695,27 @@ func (g *Graphics) DrawDashedRectangle(rc *Rect, color *Color) {
 	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
 }
 
+func (g *Graphics) DrawRectangleEx(rc *Rect, pen *Pen, brush *Brush) {
+	g.SelectBrushAndPen(pen, brush)
+	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
+}
+
+func (g *Graphics) DrawRoundRectangle(rc *Rect, cornerWidth, cornerHeight int, color *Color) {
+	pbrush := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: color.AsCOLORREF()}
+	pen := win.ExtCreatePen(win.PS_SOLID, 1, pbrush, 0, nil)
+	defer win.DeleteObject(win.HGDIOBJ(pen))
+	previousPen := win.SelectObject(g.hdc, win.HGDIOBJ(pen))
+	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousPen))
+	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
+	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
+	win.RoundRect(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom), int32(cornerWidth), int32(cornerHeight))
+}
+
+func (g *Graphics) DrawRoundRectangleEx(rc *Rect, w, h int, pen *Pen, brush *Brush) {
+	g.SelectBrushAndPen(pen, brush)
+	win.RoundRect(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom), int32(w), int32(h))
+}
+
 func (g *Graphics) DrawEllipse(rc *Rect, color *Color) {
 	pbrush := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: color.AsCOLORREF()}
 	pen := win.ExtCreatePen(win.PS_SOLID, 1, pbrush, 0, nil)
@@ -736,6 +724,11 @@ func (g *Graphics) DrawEllipse(rc *Rect, color *Color) {
 	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousPen))
 	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
 	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
+	win.Ellipse(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
+}
+
+func (g *Graphics) DrawEllipseEx(rc *Rect, pen *Pen, brush *Brush) {
+	g.SelectBrushAndPen(pen, brush)
 	win.Ellipse(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
 }
 
@@ -755,24 +748,6 @@ func (g *Graphics) DrawPolygon(points []Point, color *Color) {
 	Polygon(g.hdc, &wpoints[0], int32(len(wpoints)))
 }
 
-func (g *Graphics) SelectObject(obj GdiObject) (prev win.HGDIOBJ) {
-	prev = win.SelectObject(g.hdc, obj.GetGdiObject())
-	return
-}
-
-func (g *Graphics) SelectBrushAndPen(pen *Pen, brush *Brush) {
-	if pen == nil {
-		win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_PEN)))
-	} else {
-		g.SelectObject(pen)
-	}
-	if brush == nil {
-		win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
-	} else {
-		g.SelectObject(brush)
-	}
-}
-
 func (g *Graphics) DrawPolygonEx(points []Point, pen *Pen, brush *Brush) {
 	g.SelectBrushAndPen(pen, brush)
 	wpoints := make([]win.POINT, len(points))
@@ -783,22 +758,47 @@ func (g *Graphics) DrawPolygonEx(points []Point, pen *Pen, brush *Brush) {
 	Polygon(g.hdc, &wpoints[0], int32(len(wpoints)))
 }
 
-func (g *Graphics) DrawEllipseEx(rc *Rect, pen *Pen, brush *Brush) {
-	g.SelectBrushAndPen(pen, brush)
-	win.Ellipse(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
+// FillRect fills the given rectangle with the specified color
+func (g *Graphics) FillRect(rc *Rect, color *Color) {
+	brush := NewSolidBrush(color)
+	defer brush.Dispose()
+	wrect := rc.AsRECT()
+	FillRect(g.GetHDC(), &wrect, brush.NativeBrush)
 }
 
-func (g *Graphics) DrawRectangleEx(rc *Rect, pen *Pen, brush *Brush) {
-	g.SelectBrushAndPen(pen, brush)
+func (g *Graphics) FillRectangle(rc *Rect, borderColor, fillColor *Color) {
+	if borderColor == fillColor {
+		g.FillRect(rc, fillColor)
+		return
+	}
+	pbrush := &win.LOGBRUSH{LbStyle: win.PS_SOLID, LbColor: borderColor.AsCOLORREF()}
+	pen := win.ExtCreatePen(win.PS_SOLID, 1, pbrush, 0, nil)
+	defer win.DeleteObject(win.HGDIOBJ(pen))
+	previousPen := win.SelectObject(g.hdc, win.HGDIOBJ(pen))
+	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousPen))
+
+	lb := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: fillColor.AsCOLORREF()}
+	brush := win.CreateBrushIndirect(lb)
+	defer win.DeleteObject(win.HGDIOBJ(brush))
+	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(brush))
+	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
+
 	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
 }
 
-func (g *Graphics) DrawRoundRectangleEx(rc *Rect, w, h int, pen *Pen, brush *Brush) {
-	g.SelectBrushAndPen(pen, brush)
-	win.RoundRect(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom), int32(w), int32(h))
+func (g *Graphics) FillRectangleEx(rc *Rect, pen *Pen, brush *Brush) {
+	win.SelectObject(g.hdc, win.HGDIOBJ(pen.NativePen))
+	win.SelectObject(g.hdc, win.HGDIOBJ(brush.NativeBrush))
+	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
 }
 
-func (g *Graphics) DrawFillPolygon(points []Point, color, fillColor *Color) {
+func (g *Graphics) FillEllipseEx(rc *Rect, pen *Pen, brush *Brush) {
+	win.SelectObject(g.hdc, win.HGDIOBJ(pen.NativePen))
+	win.SelectObject(g.hdc, win.HGDIOBJ(brush.NativeBrush))
+	win.Ellipse(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
+}
+
+func (g *Graphics) FillPolygon(points []Point, color, fillColor *Color) {
 	pbrush := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: color.AsCOLORREF()}
 	pen := win.ExtCreatePen(win.PS_SOLID, 1, pbrush, 0, nil)
 	defer win.DeleteObject(win.HGDIOBJ(pen))

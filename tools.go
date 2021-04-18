@@ -63,43 +63,43 @@ func (tool *ToolBasic) getCursor(ptMouse *Point) win.HCURSOR {
 	return mainWindow.hCursorArrow
 }
 
-func asGdiplusColor(color *Color) *gdiplus.Color {
+func AsGdiplusColor(color *Color) *gdiplus.Color {
 	return gdiplus.NewColor(color.R, color.G, color.B, color.A)
 }
 
-func fromGdiplusColor(color *gdiplus.Color) Color {
+func FromGdiplusColor(color *gdiplus.Color) Color {
 	return Rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA())
 }
 
-func getColorForeground() (color gdiplus.Color) {
+func GetColorForeground() (color gdiplus.Color) {
 	c := mainWindow.color1.GetColor()
 	color.Argb = gdiplus.MakeARGB(c.A, c.R, c.G, c.B)
 	return
 }
 
-func getColorBackground() (color gdiplus.Color) {
+func GetColorBackground() (color gdiplus.Color) {
 	c := mainWindow.color2.GetColor()
 	color.Argb = gdiplus.MakeARGB(c.A, c.R, c.G, c.B)
 	return
 }
 
-func getColorForeBack(mouseButton int) (color gdiplus.Color) {
+func GetColorForeBack(mouseButton int) (color gdiplus.Color) {
 	if mouseButton == MouseButtonRight {
-		return getColorBackground()
+		return GetColorBackground()
 	}
-	return getColorForeground()
+	return GetColorForeground()
 }
 
-func getOutlineAndFillColors(mouseButton int) (outline, fill gdiplus.Color) {
+func GetOutlineAndFillColors(mouseButton int) (outline, fill gdiplus.Color) {
 	if mouseButton == MouseButtonRight {
-		return getColorBackground(), getColorForeground()
+		return GetColorBackground(), GetColorForeground()
 	}
-	return getColorForeground(), getColorBackground()
+	return GetColorForeground(), GetColorBackground()
 }
 
 // brush and pen must be disposed by the caller
-func getPenAndBrush(mbutton int, penwidth float32) (*gdiplus.Pen, *gdiplus.Brush) {
-	outline, fill := getOutlineAndFillColors(mbutton)
+func GetPenAndBrush(mbutton int, penwidth float32) (*gdiplus.Pen, *gdiplus.Brush) {
+	outline, fill := GetOutlineAndFillColors(mbutton)
 	var pen *gdiplus.Pen = nil
 	var brush *gdiplus.Brush = nil
 	if mainWindow.menuSolidOutline.IsToggled() {
@@ -123,7 +123,7 @@ func ggDrawPolygon(gc *gg.Context, points []Point) {
 	gc.ClosePath()
 }
 
-func getStartAndEnd(start, end Point) (s gdiplus.Point, e gdiplus.Point) {
+func GetStartAndEnd(start, end Point) (s gdiplus.Point, e gdiplus.Point) {
 	startPoint := start
 	endPoint := end
 	if startPoint.X > endPoint.X {

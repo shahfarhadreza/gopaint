@@ -20,11 +20,11 @@ type PropertiesDialog struct {
 
 func NewResizeDialog(parent Window) *ResizeDialog {
 	dlg := &ResizeDialog{Dialog: NewDialog()}
-	dlg.init(parent)
+	dlg.Init(parent)
 	return dlg
 }
 
-func (dlg *ResizeDialog) init(parent Window) {
+func (dlg *ResizeDialog) Init(parent Window) {
 	logInfo("Initialize Resize dialog...")
 	dlg.Dialog.Initialize(parent, "Resize", 300, 320)
 
@@ -53,11 +53,11 @@ func (dlg *ResizeDialog) init(parent Window) {
 
 func NewPropertiesDialog(parent Window) *PropertiesDialog {
 	dlg := &PropertiesDialog{Dialog: NewDialog()}
-	dlg.init(parent)
+	dlg.Init(parent)
 	return dlg
 }
 
-func (dlg *PropertiesDialog) init(parent Window) {
+func (dlg *PropertiesDialog) Init(parent Window) {
 	logInfo("Initialize Properties dialog...")
 	dlg.Dialog.Initialize(parent, "Image Properties", 340, 360)
 

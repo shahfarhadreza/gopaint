@@ -236,7 +236,7 @@ func (menu *popupMenuData) drawItems(g *Graphics, rect *Rect) {
 			// Draw a captioned seperator if text isn't empty
 			if item.HasText() {
 				rcSeperator := *item.GetRect()
-				g.DrawFillRectangle(&rcSeperator, NewRgb(255, 255, 255), NewRgb(255, 255, 255))
+				g.FillRectangle(&rcSeperator, NewRgb(255, 255, 255), NewRgb(255, 255, 255))
 				g.DrawLine(rect.Left, rect.Top, rect.Left, rect.Bottom, &menuBorderColor)
 				g.DrawLine(rect.Right-1, rect.Top, rect.Right-1, rect.Bottom, &menuBorderColor)
 				g.DrawLine(rect.Left+2, rcSeperator.Top, rect.Right-3, rcSeperator.Top, &menuBorderColor)
@@ -256,7 +256,7 @@ func (menu *popupMenuData) drawItems(g *Graphics, rect *Rect) {
 				rcHover.Right -= 2
 				rcHover.Top += 2
 				rcHover.Bottom--
-				g.DrawFillRectangle(&rcHover, NewRgb(168, 210, 253), NewRgb(237, 244, 252))
+				g.FillRectangle(&rcHover, NewRgb(168, 210, 253), NewRgb(237, 244, 252))
 			}
 			rectIcon := *prect
 			rectIcon.Right = prect.Left + menu.leftMargin
@@ -265,7 +265,7 @@ func (menu *popupMenuData) drawItems(g *Graphics, rect *Rect) {
 				rectIcon.Right -= 2
 				rectIcon.Top += 2
 				rectIcon.Bottom -= 2
-				g.DrawFillRectangle(&rectIcon, NewRgb(100, 165, 230), NewRgb(205, 230, 252))
+				g.FillRectangle(&rectIcon, NewRgb(100, 165, 230), NewRgb(205, 230, 252))
 			}
 			rectIcon = *prect
 			rectIcon.Right = prect.Left + menu.leftMargin
