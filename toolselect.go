@@ -56,6 +56,10 @@ func (tool *ToolSelect) prepare() {
 
 func (tool *ToolSelect) leave() {
 	tool.finalizeSelection()
+	tool.selected = false
+	tool.currentAction = SelectActionNone
+	tool.selection.Clear()
+	tool.updateStatus()
 	if tool.bitmap != nil {
 		tool.bitmap.Dispose()
 		tool.bitmap = nil
