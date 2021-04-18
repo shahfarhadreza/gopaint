@@ -46,7 +46,8 @@ func (s *PointStack) Push(value Point) {
 
 func (s *PointStack) Pop() (value Point) {
 	if s.size > 0 {
-		value, s.top = s.top.value, s.top.next
+		value = s.top.value
+		s.top = s.top.next
 		s.size--
 		return
 	}
