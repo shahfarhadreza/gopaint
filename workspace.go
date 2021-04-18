@@ -69,6 +69,13 @@ func (work *Workspace) Init(parent Window) {
 	work.SetSetCursorEventHandler(work.updateCursor)
 	work.SetHScrollEventHandler(work.HScroll)
 	work.SetVScrollEventHandler(work.VScroll)
+	work.SetMouseWheelEventHandler(func(e *MouseWheelEvent) {
+		if e.WheelDelta > 0 {
+			work.ScrollUp()
+		} else {
+			work.ScrollDown()
+		}
+	})
 
 	color := Rgb(255, 255, 255)
 	brushWhite := win.HBRUSH(win.GetStockObject(win.WHITE_BRUSH))
