@@ -48,6 +48,8 @@ func NewDrawingImage(width, height int) *DrawingImage {
 }
 
 func (image *DrawingImage) Dispose() {
+	image.context3 = nil
+	image.context2 = nil
 	if image.context != nil {
 		image.context.Dispose()
 	}
@@ -56,7 +58,7 @@ func (image *DrawingImage) Dispose() {
 	}
 	DeleteHBitmap(image.hbitmap)
 	image.hbitmap = 0
-
+	image.Pix = nil
 }
 
 func (di *DrawingImage) Width() int {
