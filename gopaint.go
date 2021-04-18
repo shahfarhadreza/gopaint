@@ -9,7 +9,8 @@ import (
 
 type Gopaint struct {
 	reza.Application
-	Title string
+	Title             string
+	DefaultCanvasSize reza.Size
 }
 
 var app *Gopaint
@@ -32,6 +33,10 @@ func main() {
 	app = &Gopaint{
 		Application: reza.NewApplication(),
 		Title:       "GoPaint",
+		DefaultCanvasSize: reza.Size{
+			Width:  1920,
+			Height: 1080,
+		},
 	}
 	app.SetMainWindow(NewMainWindow())
 	if app.GetMainWindow().Show() {
