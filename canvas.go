@@ -144,7 +144,7 @@ func (canvas *DrawingCanvas) NewImage(width, height int) {
 func (canvas *DrawingCanvas) Resize(width, height int) {
 	prevWidth := canvas.GetSize().Width
 	prevHeight := canvas.GetSize().Height
-	log.Printf("Resize from (%d x %d) to (%d x %d)\n", prevWidth, prevHeight, width, height)
+	log.Printf("Resizing from (%d x %d) to (%d x %d)...\n", prevWidth, prevHeight, width, height)
 	if prevWidth == width && prevHeight == height {
 		return
 	}
@@ -163,6 +163,7 @@ func (canvas *DrawingCanvas) Resize(width, height int) {
 	rect2 := canvas.image.Bounds()
 	draw.Draw(newImage, rect2, canvas.image, image.Point{}, draw.Src)
 
+	// Reserve the additional infos
 	newImage.filepath = canvas.image.filepath
 	newImage.sizeOnDisk = canvas.image.sizeOnDisk
 	newImage.lastSaved = canvas.image.lastSaved
@@ -172,6 +173,7 @@ func (canvas *DrawingCanvas) Resize(width, height int) {
 
 	canvas.SetSize(width, height)
 	canvas.UpdateStatus()
+	logInfo("Done resizing")
 }
 
 func (canvas *DrawingCanvas) OpenImage(filename string) bool {
