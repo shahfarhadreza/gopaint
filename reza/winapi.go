@@ -273,6 +273,8 @@ var (
 	createPen          *windows.LazyProc
 	enumFontFamiliesEx *windows.LazyProc
 	extTextOutW        *windows.LazyProc
+	createRectRgn      *windows.LazyProc
+	selectClipRgn      *windows.LazyProc
 )
 
 func loadApiFunctions() {
@@ -291,6 +293,8 @@ func loadApiFunctions() {
 	createPen = libgdi32.NewProc("CreatePen")
 	enumFontFamiliesEx = libgdi32.NewProc("EnumFontFamiliesExW")
 	extTextOutW = libgdi32.NewProc("ExtTextOutW")
+	createRectRgn = libgdi32.NewProc("CreateRectRgn")
+	selectClipRgn = libgdi32.NewProc("SelectClipRgn")
 	// User32 Functions
 	fillRect = libuser32.NewProc("FillRect")
 	getCapture = libuser32.NewProc("GetCapture")
@@ -308,6 +312,22 @@ func loadApiFunctions() {
 	//coUninitialize = libole32.NewProc("CoUninitialize")
 	// Shell API
 	qiSearch = libshlwapi.NewProc("QISearch")
+}
+
+func CreateRectRgn(x1, y1, x2, y2 int32) win.HRGN {
+	ret, _, _ := createRectRgn.Call(
+		uintptr(x1),
+		uintptr(y1),
+		uintptr(x2),
+		uintptr(y2))
+	return win.HRGN(ret)
+}
+
+func SelectClipRgn(hdc win.HDC, hrgn win.HRGN) int32 {
+	ret, _, _ := selectClipRgn.Call(
+		uintptr(hdc),
+		uintptr(hrgn))
+	return int32(ret)
 }
 
 func ExtTextOutW(hdc win.HDC, x, y int32, options uint32, rect *Rect, text *uint16, textCount uint32, lpDx *int32) int32 {
