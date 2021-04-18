@@ -684,14 +684,12 @@ func (g *Graphics) DrawRectangle(rc *Rect, color *Color) {
 
 func (g *Graphics) DrawDashedRectangle(rc *Rect, color *Color) {
 	pbrush := &win.LOGBRUSH{LbStyle: win.BS_SOLID, LbColor: color.AsCOLORREF()}
+
 	pen := win.ExtCreatePen(win.PS_COSMETIC|win.PS_ALTERNATE, 1, pbrush, 0, nil)
 	defer win.DeleteObject(win.HGDIOBJ(pen))
-	previousPen := win.SelectObject(g.hdc, win.HGDIOBJ(pen))
-	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousPen))
+	win.SelectObject(g.hdc, win.HGDIOBJ(pen))
 
-	previousBrush := win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
-	defer win.SelectObject(g.hdc, win.HGDIOBJ(previousBrush))
-
+	win.SelectObject(g.hdc, win.HGDIOBJ(win.GetStockObject(win.NULL_BRUSH)))
 	win.Rectangle_(g.hdc, int32(rc.Left), int32(rc.Top), int32(rc.Right), int32(rc.Bottom))
 }
 
