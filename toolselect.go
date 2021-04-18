@@ -95,8 +95,17 @@ func (tool *ToolSelect) draw(e *ToolDrawEvent) {
 		rect := tool.selection.GetRect()
 		if !tool.selection.IsEmpty() {
 			if tool.bitmap != nil {
-				g.BitBlt(rect.Left, rect.Top,
-					rect.Width(), rect.Height(), tool.bitmap.Hdc,
+				canvas := mainWindow.workspace.canvas
+				visibleRect := canvas.GetVisibleRect()
+				newRect := rect
+				if newRect.Bottom > visibleRect.Bottom {
+					newRect.Bottom = visibleRect.Bottom
+				}
+				if newRect.Right > visibleRect.Right {
+					newRect.Right = visibleRect.Right
+				}
+				g.BitBlt(newRect.Left, newRect.Top,
+					newRect.Width(), newRect.Height(), tool.bitmap.Hdc,
 					0, 0, win.SRCCOPY)
 			}
 			if tool.currentAction == SelectActionSelecting || tool.currentAction == SelectActionMoving {
@@ -187,10 +196,13 @@ func (tool *ToolSelect) mouseDownEvent(e *ToolMouseEvent) {
 						bitmapContext := tool.bitmap.Graphics
 						bitmapContext.BitBlt(0, 0, w, h, e.image.context3.GetHDC(), rect.Left, rect.Top, win.SRCCOPY)
 						// replace the area with background color
-						context := e.image.context
-						color := GetColorBackground()
-						brush := gdiplus.NewSolidBrush(&color)
-						context.FillRectangleI(brush.AsBrush(), int32(rect.Left), int32(rect.Top), int32(w), int32(h))
+						context := e.image.context3
+						gcolor := GetColorBackground()
+						color := FromGdiplusColor(&gcolor)
+						brush := NewSolidBrush(&color)
+						pen := NewSolidPen(1, &color)
+						context.FillRectangleEx(&rect, pen, brush)
+						pen.Dispose()
 						brush.Dispose()
 					}
 				}
