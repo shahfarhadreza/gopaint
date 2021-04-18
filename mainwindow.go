@@ -87,7 +87,7 @@ func (window *MainWindow) Initialize() {
 	window.workspace = NewWorkspace(window)
 	window.workspace.SetDockType(DockFill)
 
-	window.SetCurrentTool(window.tools.toolBrush)
+	window.SetCurrentTool(window.tools.toolSelect)
 
 	window.resizeDialog = NewResizeDialog(window)
 	window.propertiesDialog = NewPropertiesDialog(window)
