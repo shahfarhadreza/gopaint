@@ -23,7 +23,7 @@ type ribbonData struct {
 	// Embedd Window interface
 	Window
 	tabs           []*RibbonTab
-	tabSelected    *RibbonTab
+	tabActive      *RibbonTab
 	initialized    bool
 	rectAppMenu    Rect
 	appMenu        PopupMenu
@@ -55,6 +55,24 @@ func (ribbon *ribbonData) init(parent Window) {
 	ribbon.SetMouseMoveEventHandler(ribbon.mouseMove)
 	ribbon.SetMouseDownEventHandler(ribbon.mouseDown)
 	ribbon.SetMouseUpEventHandler(ribbon.mouseUp)
+	ribbon.SetMouseUpEventHandler(ribbon.mouseUp)
+	ribbon.SetMouseWheelEventHandler(func(e *MouseWheelEvent) {
+		activeTabIndex := 0
+		for i := range ribbon.tabs {
+			if ribbon.tabs[i] == ribbon.tabActive {
+				activeTabIndex = i
+				break
+			}
+		}
+		if e.WheelDelta > 0 {
+			activeTabIndex--
+		} else {
+			activeTabIndex++
+		}
+		if activeTabIndex >= 0 && activeTabIndex < len(ribbon.tabs) {
+			ribbon.SetCurrentTab(ribbon.tabs[activeTabIndex])
+		}
+	})
 
 	// We just need only one image instence. We can draw it over and over whenever and whereever we need
 	if imageCheck == nil {
@@ -101,7 +119,10 @@ func (ribbon *ribbonData) AddTab(text string) *RibbonTab {
 
 // SetCurrentTab sets the given tab as selected
 func (ribbon *ribbonData) SetCurrentTab(tab *RibbonTab) {
-	ribbon.tabSelected = tab
+	if ribbon.tabActive == tab {
+		return
+	}
+	ribbon.tabActive = tab
 	if !ribbon.IsRepaintSuspended() {
 		ribbon.Repaint()
 	}
@@ -117,7 +138,7 @@ func (ribbon *ribbonData) SetApplicationMenu(caption string, menu PopupMenu) {
 }
 
 func (ribbon *ribbonData) removeStateAllButtons(state uint8) {
-	for _, sec := range ribbon.tabSelected.sections {
+	for _, sec := range ribbon.tabActive.sections {
 		for _, ibutton := range sec.buttons {
 			button := ibutton.(*RibbonButtonData)
 			button.removeState(state)
@@ -136,11 +157,11 @@ func (ribbon *ribbonData) mouseDown(pt *Point, mbutton int) {
 		} else {
 			for _, tab := range ribbon.tabs {
 				if pt.IsInsideRect(&tab.rectHeader) {
-					ribbon.tabSelected = tab
+					ribbon.tabActive = tab
 					break
 				}
 			}
-			for _, sec := range ribbon.tabSelected.sections {
+			for _, sec := range ribbon.tabActive.sections {
 				for _, ibutton := range sec.buttons {
 					button := ibutton.(*RibbonButtonData)
 					rect := button.rect
@@ -186,7 +207,7 @@ func (ribbon *ribbonData) mouseDown(pt *Point, mbutton int) {
 func (ribbon *ribbonData) mouseUp(pt *Point, mbutton int) {
 	ribbon.removeStateAllButtons(RibbonButtonStatePressed)
 	if mbutton == MouseButtonLeft {
-		for _, sec := range ribbon.tabSelected.sections {
+		for _, sec := range ribbon.tabActive.sections {
 			for _, ibutton := range sec.buttons {
 				button := ibutton.(*RibbonButtonData)
 				rect := button.rect
@@ -233,7 +254,7 @@ func (ribbon *ribbonData) mouseMove(pt *Point, mbutton int) {
 			}
 		}
 		ribbon.removeStateAllButtons(RibbonButtonStateHot)
-		for _, sec := range ribbon.tabSelected.sections {
+		for _, sec := range ribbon.tabActive.sections {
 			for _, ibutton := range sec.buttons {
 				button := ibutton.(*RibbonButtonData)
 				rect := button.rect
@@ -253,7 +274,7 @@ func (ribbon *ribbonData) mouseMove(pt *Point, mbutton int) {
 }
 
 func (ribbon *ribbonData) measureRibbonSections(g *Graphics, rcTab *Rect) {
-	tab := ribbon.tabSelected
+	tab := ribbon.tabActive
 	if tab == nil {
 		log.Println("bug in the application - 'ribbon.tabSelected' is nil")
 		return
@@ -662,7 +683,7 @@ func (ribbon *ribbonData) paint(gOrg *Graphics, rc *Rect) {
 		rectTabHead := tab.rectHeader
 		g.DrawText(tab.caption, &rectTabHead, win.DT_CENTER|win.DT_VCENTER|win.DT_SINGLELINE, &textColor, font)
 
-		if tab == ribbon.tabSelected {
+		if tab == ribbon.tabActive {
 			// top border
 			g.DrawLine(tab.x, 0, tab.x+tab.width, 0, &borderColor)
 			// left border
@@ -687,7 +708,7 @@ func (ribbon *ribbonData) paint(gOrg *Graphics, rc *Rect) {
 	rcTab := Rect{Left: 0, Top: tabHeaderHeight + 4, Right: rc.Right, Bottom: rc.Bottom - textHeight}
 	ribbon.measureRibbonSections(g, &rcTab)
 
-	for _, section := range ribbon.tabSelected.sections {
+	for _, section := range ribbon.tabActive.sections {
 		seperatorX := section.rect.Right
 		g.DrawLine(seperatorX, rcTab.Top, seperatorX, rc.Bottom-4, &borderColor)
 		if len(section.caption) > 0 {
