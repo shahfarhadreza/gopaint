@@ -78,8 +78,8 @@ func (dlg *PropertiesDialog) Init(parent Window) {
 				&WLabel{Text: "Height:\t", Margins: Margins{Top: 4}},
 				&WTextBox{Text: "648", Width: 60, Height: 24, Margins: Margins{Right: 10}, AssignTo: &dlg.height},
 				&WButton{Text: "Default", Width: 70, Height: 24, OnClick: func(sender Button) {
-					dlg.width.SetText("1152")
-					dlg.height.SetText("648")
+					dlg.width.SetText(strconv.Itoa(app.DefaultCanvasSize.Width))
+					dlg.height.SetText(strconv.Itoa(app.DefaultCanvasSize.Height))
 				}},
 			}},
 		&WFlowContainer{FlowDirection: FlowNone, DockType: DockFill,
