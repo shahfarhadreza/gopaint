@@ -39,11 +39,11 @@ type Workspace struct {
 
 func NewWorkspace(parent Window) *Workspace {
 	workspace := &Workspace{Window: NewWindow()}
-	workspace.init(parent)
+	workspace.Init(parent)
 	return workspace
 }
 
-func (work *Workspace) isMouseOnResize() (resizeType int) {
+func (work *Workspace) IsMouseOnResize() (resizeType int) {
 	var winpt win.POINT
 	win.GetCursorPos(&winpt)
 	win.ScreenToClient(work.GetHandle(), &winpt)
@@ -58,17 +58,17 @@ func (work *Workspace) isMouseOnResize() (resizeType int) {
 	return ResizeTypeNone
 }
 
-func (work *Workspace) init(parent Window) {
+func (work *Workspace) Init(parent Window) {
 	logInfo("init workspace...")
 	work.Create("", win.WS_CHILD|win.WS_CLIPCHILDREN|win.WS_VISIBLE|win.WS_VSCROLL|win.WS_HSCROLL, 10, 10, 10, 10, parent)
-	work.SetMouseMoveEventHandler(work.mouseMove)
-	work.SetMouseDownEventHandler(work.mouseDown)
-	work.SetMouseUpEventHandler(work.mouseUp)
-	work.SetPaintEventHandler(work.paint)
-	work.SetResizeEventHandler(work.updateLayout)
+	work.SetMouseMoveEventHandler(work.MouseMove)
+	work.SetMouseDownEventHandler(work.MouseDown)
+	work.SetMouseUpEventHandler(work.MouseUp)
+	work.SetPaintEventHandler(work.Paint)
+	work.SetResizeEventHandler(work.OnResize)
 	work.SetSetCursorEventHandler(work.updateCursor)
-	work.SetHScrollEventHandler(work.hscroll)
-	work.SetVScrollEventHandler(work.vscroll)
+	work.SetHScrollEventHandler(work.HScroll)
+	work.SetVScrollEventHandler(work.VScroll)
 
 	color := Rgb(255, 255, 255)
 	brushWhite := win.HBRUSH(win.GetStockObject(win.WHITE_BRUSH))
@@ -83,7 +83,7 @@ func (work *Workspace) init(parent Window) {
 	SetLayeredWindowAttributes(work.resizePreview.GetHandle(), color.AsCOLORREF(), 0, LWA_COLORKEY)
 
 	work.canvas = NewDrawingCanvas(work)
-	work.canvas.NewImage(1920, 1080)
+	work.canvas.NewImage(app.DefaultCanvasSize.Width, app.DefaultCanvasSize.Height)
 	//work.canvas.OpenImage(".\\images\\cloudy.jpg")
 	// test
 	//work.canvas.Resize(1100, 620)
@@ -101,16 +101,16 @@ func (work *Workspace) Dispose() {
 
 func (work *Workspace) ScrollUp() {
 	yNewPos := work.yCurrentScroll - 50
-	work.updateVScroll(yNewPos)
+	work.UpdateVScroll(yNewPos)
 }
 
 func (work *Workspace) ScrollDown() {
 	yNewPos := work.yCurrentScroll + 50
-	work.updateVScroll(yNewPos)
+	work.UpdateVScroll(yNewPos)
 }
 
 func (work *Workspace) updateCursor() bool {
-	resizeType := work.isMouseOnResize()
+	resizeType := work.IsMouseOnResize()
 	if resizeType == ResizeTypeHeight {
 		win.SetCursor(mainWindow.hCursorSizeNS)
 	} else if resizeType == ResizeTypeWidth {
@@ -123,7 +123,7 @@ func (work *Workspace) updateCursor() bool {
 	return true
 }
 
-func (work *Workspace) updateVScroll(newValue int) {
+func (work *Workspace) UpdateVScroll(newValue int) {
 	yNewPos := newValue
 	// New position must be between 0 and the screen height.
 	yNewPos = Max(0, yNewPos)
@@ -157,7 +157,7 @@ func (work *Workspace) updateVScroll(newValue int) {
 	work.Update()
 }
 
-func (work *Workspace) updateHScroll(newValue int) {
+func (work *Workspace) UpdateHScroll(newValue int) {
 	// New position must be between 0 and the screen width.
 	xNewPos := newValue
 	xNewPos = Max(0, xNewPos)
@@ -191,7 +191,7 @@ func (work *Workspace) updateHScroll(newValue int) {
 	work.Update()
 }
 
-func (work *Workspace) vscroll(stype, position int) {
+func (work *Workspace) VScroll(stype, position int) {
 	yNewPos := 0 // new position
 	switch stype {
 	case win.SB_PAGEUP:
@@ -207,10 +207,10 @@ func (work *Workspace) vscroll(stype, position int) {
 	default:
 		yNewPos = work.yCurrentScroll
 	}
-	work.updateVScroll(yNewPos)
+	work.UpdateVScroll(yNewPos)
 }
 
-func (work *Workspace) hscroll(stype, position int) {
+func (work *Workspace) HScroll(stype, position int) {
 	xNewPos := 0 // new position
 	switch stype {
 	case win.SB_PAGEUP:
@@ -226,10 +226,10 @@ func (work *Workspace) hscroll(stype, position int) {
 	default:
 		xNewPos = work.xCurrentScroll
 	}
-	work.updateHScroll(xNewPos)
+	work.UpdateHScroll(xNewPos)
 }
 
-func (work *Workspace) updateLayout(clientNotused *Rect) {
+func (work *Workspace) OnResize(clientNotused *Rect) {
 	var si win.SCROLLINFO
 
 	client := work.GetClientRect()
@@ -277,21 +277,95 @@ func (work *Workspace) updateLayout(clientNotused *Rect) {
 	}
 }
 
-func (work *Workspace) mouseDown(pt *Point, mbutton int) {
+func (work *Workspace) MouseDown(pt *Point, mbutton int) {
 	win.SetCapture(work.GetHandle())
-	work.resizeType = work.isMouseOnResize()
+	work.resizeType = work.IsMouseOnResize()
 	work.ptMouseDown = app.GetCursorPos()
 
 	if work.resizeType != ResizeTypeNone {
 		logInfo("Resize!!!")
 		canvas := work.canvas
-		screenRect := canvas.GetWindowRect()
-		work.resizePreview.MoveWindow(screenRect.Left, screenRect.Top, screenRect.Width(), screenRect.Height(), true)
-		work.resizePreview.SetVisible(true)
+		preview := work.resizePreview
+		wrect := work.GetWindowRect()
+		crect := canvas.GetWindowRect()
+		previewLeft := crect.Left
+		diffLeft := 0
+		previewWidth := crect.Width()
+		previewTop := crect.Top
+		diffTop := 0
+		previewHeight := crect.Height()
+		if previewLeft < wrect.Left {
+			diffLeft = wrect.Left - previewLeft
+			previewLeft = wrect.Left
+		}
+		if (crect.Left + previewWidth) > wrect.Right {
+			previewWidth -= (crect.Left + previewWidth) - wrect.Right
+		}
+		if previewTop < wrect.Top {
+			diffTop = wrect.Top - previewTop
+			previewTop = wrect.Top
+		}
+		if (crect.Top + previewHeight) > wrect.Bottom {
+			previewHeight -= (crect.Top + previewHeight) - wrect.Bottom
+		}
+		preview.MoveWindow(previewLeft, previewTop, previewWidth-diffLeft, previewHeight-diffTop, true)
+		preview.SetVisible(true)
+		preview.Update()
 	}
 }
 
-func (work *Workspace) mouseUp(pt *Point, mbutton int) {
+func (work *Workspace) MouseMove(pt *Point, mbutton int) {
+	if mbutton == MouseButtonLeft {
+		canvas := work.canvas
+		preview := work.resizePreview
+		wrect := work.GetWindowRect()
+		crect := canvas.GetWindowRect()
+		ptMouse := app.GetCursorPos()
+		ptMouseDiff := ptMouse.Distance(&work.ptMouseDown)
+		newHeight := crect.Height() + ptMouseDiff.Y
+		newWidth := crect.Width() + ptMouseDiff.X
+		if newHeight < 1 {
+			newHeight = 1
+		}
+		if newWidth < 1 {
+			newWidth = 1
+		}
+		previewLeft := crect.Left
+		diffLeft := 0
+		previewWidth := crect.Width()
+		previewTop := crect.Top
+		diffTop := 0
+		previewHeight := crect.Height()
+		if previewLeft < wrect.Left {
+			diffLeft = wrect.Left - previewLeft
+			previewLeft = wrect.Left
+		}
+		if (crect.Left + previewWidth) > wrect.Right {
+			previewWidth -= (crect.Left + previewWidth) - wrect.Right
+		}
+		if previewTop < wrect.Top {
+			diffTop = wrect.Top - previewTop
+			previewTop = wrect.Top
+		}
+		if (crect.Top + previewHeight) > wrect.Bottom {
+			previewHeight -= (crect.Top + previewHeight) - wrect.Bottom
+		}
+		if work.resizeType == ResizeTypeHeight {
+			preview.MoveWindow(previewLeft, previewTop, previewWidth-diffLeft, newHeight-diffTop, true)
+			preview.Update()
+
+		} else if work.resizeType == ResizeTypeWidth {
+			preview.MoveWindow(previewLeft, previewTop, newWidth-diffLeft, previewHeight-diffTop, true)
+			preview.Update()
+
+		} else if work.resizeType == ResizeTypeBoth {
+			preview.MoveWindow(previewLeft, previewTop, newWidth-diffLeft, newHeight-diffTop, true)
+			preview.Update()
+		}
+	}
+}
+
+func (work *Workspace) MouseUp(pt *Point, mbutton int) {
 	if mbutton == MouseButtonLeft {
 		if work.resizeType != ResizeTypeNone {
 			canvas := work.canvas
@@ -321,33 +395,7 @@ func (work *Workspace) mouseUp(pt *Point, mbutton int) {
 	win.ReleaseCapture()
 }
 
-func (work *Workspace) mouseMove(pt *Point, mbutton int) {
-	if mbutton == MouseButtonLeft {
-		canvas := work.canvas
-		crect := canvas.GetWindowRect()
-		ptMouse := app.GetCursorPos()
-		ptMouseDiff := ptMouse.Distance(&work.ptMouseDown)
-		newHeight := crect.Height() + ptMouseDiff.Y
-		newWidth := crect.Width() + ptMouseDiff.X
-		if newHeight < 1 {
-			newHeight = 1
-		}
-		if newWidth < 1 {
-			newWidth = 1
-		}
-		if work.resizeType == ResizeTypeHeight {
-			work.resizePreview.MoveWindow(crect.Left, crect.Top, crect.Width(), newHeight, true)
-
-		} else if work.resizeType == ResizeTypeWidth {
-			work.resizePreview.MoveWindow(crect.Left, crect.Top, newWidth, crect.Height(), true)
-
-		} else if work.resizeType == ResizeTypeBoth {
-			work.resizePreview.MoveWindow(crect.Left, crect.Top, newWidth, newHeight, true)
-		}
-	}
-}
-
-func (work *Workspace) calculateResizeHandles(rect *Rect) {
+func (work *Workspace) CalcResizeHandles(rect *Rect) {
 	const size = 6
 	work.rcBoxBottom.Left = rect.CenterX()
 	work.rcBoxBottom.Top = rect.Bottom
@@ -365,7 +413,7 @@ func (work *Workspace) calculateResizeHandles(rect *Rect) {
 	work.rcBoxCorner.Bottom = work.rcBoxCorner.Top + size
 }
 
-func (work *Workspace) paint(gOrg *Graphics, rect *Rect) {
+func (work *Workspace) Paint(gOrg *Graphics, rect *Rect) {
 	if work.doubleBuffer == nil {
 		return
 	}
@@ -387,7 +435,7 @@ func (work *Workspace) paint(gOrg *Graphics, rect *Rect) {
 
 	g.FillRect(&rectShadow, NewRgb(183, 194, 211))
 
-	work.calculateResizeHandles(&rectCanvas)
+	work.CalcResizeHandles(&rectCanvas)
 
 	g.FillRectangle(&work.rcBoxBottom, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
 	g.FillRectangle(&work.rcBoxRight, NewRgb(70, 70, 70), NewRgb(255, 255, 255))
