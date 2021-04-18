@@ -148,6 +148,9 @@ func (canvas *DrawingCanvas) Resize(width, height int) {
 	if prevWidth == width && prevHeight == height {
 		return
 	}
+	if width < 1 || height < 1 {
+		log.Panicf("INVALID RESIZE SIZE - (%d x %d)\n", width, height)
+	}
 	if canvas.image == nil {
 		log.Panicln("WHY is canvas image INVALID!!!")
 	}
