@@ -78,10 +78,10 @@ func (window *MainWindow) Initialize() {
 	statusbar := NewStatusbar(window)
 	statusbar.SetDockType(DockBottom)
 	statusbar.SetSize(0, 27)
-	window.statusMousePos = statusbar.AddStatus(".\\icons\\mouse-position.png", "1, 3px")
-	window.statusSelSize = statusbar.AddStatus(".\\icons\\selection-size.png", "10 x 10px")
-	window.statusCanvasSize = statusbar.AddStatus(".\\icons\\canvas-size.png", "800 x 600px")
-	window.statusFileSize = statusbar.AddStatus(".\\icons\\file-size.png", "0.2KB")
+	window.statusMousePos = statusbar.AddStatus(".\\icons\\mouse-position.png", "")
+	window.statusSelSize = statusbar.AddStatus(".\\icons\\selection-size.png", "")
+	window.statusCanvasSize = statusbar.AddStatus(".\\icons\\canvas-size.png", "")
+	window.statusFileSize = statusbar.AddStatus(".\\icons\\file-size.png", "")
 	window.statusbar = statusbar
 
 	window.workspace = NewWorkspace(window)
