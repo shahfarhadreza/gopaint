@@ -8,20 +8,20 @@ type RoundRectDrawer struct {
 	ShapeDrawer
 }
 
-func NewRoundedRectPath(bounds *gdiplus.Rect, radius int32) *gdiplus.GraphicsPath {
+func NewRoundedRectPath(bound *gdiplus.Rect, radius int32) *gdiplus.GraphicsPath {
 	path := gdiplus.NewPath(gdiplus.FillModeAlternate)
 	diameter := radius * 2
-	arc := gdiplus.NewRect(bounds.X, bounds.Y, diameter, diameter)
+	arc := gdiplus.NewRect(bound.X, bound.Y, diameter, diameter)
 	// top left arc
 	path.AddArcRect(arc, 180, 90)
 	// top right arc
-	arc.X = bounds.Right() - diameter
+	arc.X = bound.Right() - diameter
 	path.AddArcRect(arc, 270, 90)
 	// bottom right arc
-	arc.Y = bounds.Bottom() - diameter
+	arc.Y = bound.Bottom() - diameter
 	path.AddArcRect(arc, 0, 90)
 	// bottom left arc
-	arc.X = bounds.X
+	arc.X = bound.X
 	path.AddArcRect(arc, 90, 90)
 	path.CloseFigure()
 	return path
