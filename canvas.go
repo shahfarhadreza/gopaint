@@ -160,8 +160,14 @@ func (canvas *DrawingCanvas) Resize(width, height int) {
 	color := GetColorBackground()
 	newImage.Clear(&color)
 
-	rect2 := canvas.image.Bounds()
-	draw.Draw(newImage, rect2, canvas.image, image.Point{}, draw.Src)
+	// Lets use BitBlt for copying. Faster than raw copy
+	g := newImage.context3
+	copyWidth := Min(prevWidth, width)
+	copyHeight := Min(prevHeight, height)
+	g.BitBlt(0, 0, copyWidth, copyHeight, canvas.image.memdc, 0, 0, win.SRCCOPY)
+
+	//rect2 := canvas.image.Bounds()
+	//draw.Draw(newImage, rect2, canvas.image, image.Point{}, draw.Src)
 
 	// Reserve the additional infos
 	newImage.filepath = canvas.image.filepath
@@ -193,7 +199,7 @@ func (canvas *DrawingCanvas) OpenImage(filename string) bool {
 		return false
 	}
 	filesize := fi.Size()
-	modDate := fi.ModTime().Format("02-Jan-06 3:04 PM")
+	modDate := fi.ModTime().Format("01-Jan-01 1:00 PM")
 
 	log.Println("Decoding...")
 	var imageData image.Image
@@ -436,6 +442,9 @@ func (canvas *DrawingCanvas) Paint(g *Graphics, rect *Rect) {
 		return
 	}
 	rcVisible := canvas.GetVisibleRect()
+	clip := CreateRectRgn(int32(rcVisible.Left), int32(rcVisible.Top), int32(rcVisible.Right), int32(rcVisible.Bottom))
+	SelectClipRgn(canvas.mhdc, clip)
+
 	gmem := NewGraphics(canvas.mhdc)
 
 	gmem.BitBlt(rcVisible.Left, rcVisible.Top,
@@ -465,4 +474,6 @@ func (canvas *DrawingCanvas) Paint(g *Graphics, rect *Rect) {
 	g.BitBlt(rcVisible.Left, rcVisible.Top,
 		rcVisible.Width(), rcVisible.Height(),
 		canvas.mhdc, rcVisible.Left, rcVisible.Top, win.SRCCOPY)
+
+	win.DeleteObject(win.HGDIOBJ(clip))
 }
