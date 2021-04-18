@@ -44,13 +44,6 @@ func NewDrawingImage(width, height int) *DrawingImage {
 
 	this.context3 = NewGraphics(this.memdc)
 
-	//wrect := NewRect(0, 0, width, height).AsRECT()
-	//FillRect(this.memdc, &wrect, win.HBRUSH(win.GetStockObject(win.WHITE_BRUSH)))
-
-	//this.bitmap = gdiplus.NewBitmapEx(int32(width), int32(height), int32(this.Stride), gdiplus.PixelFormat32bppPARGB, &this.Pix[0])
-
-	//this.bitmap = gdiplus.NewBitmapFromHBITMAP(this.hbitmap)
-
 	return this
 }
 
