@@ -14,9 +14,9 @@ Oviously the codes are not platform independent since I used all the native Wind
 
 Some external Go packages are used to develop this application - 
 
-	- The Windows API wrapper from lxn. Link - https://github.com/lxn/win
-	- 'Go Graphics' is used only for the Brush Tool. Link - https://github.com/fogleman/gg
-	- Go Images for additional formats encoding/decoding. Link - https://github.com/golang/image
+- The Windows API wrapper from lxn. Link - https://github.com/lxn/win
+- 'Go Graphics' is used only for the Brush Tool. Link - https://github.com/fogleman/gg
+- Go Images for additional formats encoding/decoding. Link - https://github.com/golang/image
 
 During bulding this application I made two internal packages for convinience and more cleaner design. I sepereated the GUI codes from the main package and put it into a new internal package named 'reza'. Also I made a GDI+ wrapper package named 'gdiplus'. For now both packages are included as internal packages but I really have plan to move them as seperate packages and keep as seperate repositories on Github. So that people can use them for their projects. 
 
