@@ -1,11 +1,12 @@
 package main
 
 import (
-	"gopaint/gdiplus"
 	. "gopaint/reza"
 	"log"
 	"syscall"
 	"unsafe"
+
+	"github.com/shahfarhadreza/go-gdiplus"
 
 	"github.com/lxn/win"
 )

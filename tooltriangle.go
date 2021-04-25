@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gopaint/gdiplus"
+	"github.com/shahfarhadreza/go-gdiplus"
 )
 
 type TriangleDrawer struct {

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gopaint/gdiplus"
 	. "gopaint/reza"
+
+	"github.com/shahfarhadreza/go-gdiplus"
 )
 
 type ShapeDrawer interface {

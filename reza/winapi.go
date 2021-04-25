@@ -24,6 +24,7 @@ var (
 	mapWindowPoints            *windows.LazyProc
 	setLayeredWindowAttributes *windows.LazyProc
 	fillRect                   *windows.LazyProc
+	loadCursorFromFileW        *windows.LazyProc
 )
 
 var (
@@ -300,6 +301,7 @@ func loadApiFunctions() {
 	getCapture = libuser32.NewProc("GetCapture")
 	mapWindowPoints = libuser32.NewProc("MapWindowPoints")
 	setLayeredWindowAttributes = libuser32.NewProc("SetLayeredWindowAttributes")
+	loadCursorFromFileW = libuser32.NewProc("LoadCursorFromFileW")
 	// DWM API Functions
 	dwmIsCompositionEnabled = libdwmapi.NewProc("DwmIsCompositionEnabled")
 	dwmExtendFrameIntoClientArea = libdwmapi.NewProc("DwmExtendFrameIntoClientArea")
@@ -440,6 +442,11 @@ func FillRect(hdc win.HDC, prect *win.RECT, hbrush win.HBRUSH) int32 {
 		uintptr(unsafe.Pointer(prect)),
 		uintptr(hbrush))
 	return int32(ret)
+}
+
+func LoadCursorFromFile(lpFileName *uint16) win.HCURSOR {
+	ret, _, _ := loadCursorFromFileW.Call(uintptr(unsafe.Pointer(lpFileName)))
+	return win.HCURSOR(ret)
 }
 
 func GetCapture() win.HWND {

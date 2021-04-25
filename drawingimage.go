@@ -1,11 +1,12 @@
 package main
 
 import (
-	"gopaint/gdiplus"
 	. "gopaint/reza"
 	"image"
 	"image/color"
 	"strconv"
+
+	"github.com/shahfarhadreza/go-gdiplus"
 
 	"github.com/fogleman/gg"
 	win "github.com/lxn/win"
@@ -35,7 +36,7 @@ func NewDrawingImage(width, height int) *DrawingImage {
 	win.SelectObject(this.memdc, win.HGDIOBJ(this.hbitmap))
 	win.ReleaseDC(0, hScreenDC)
 
-	this.context = gdiplus.NewGraphicsFromHDC(this.memdc)
+	this.context = gdiplus.NewGraphicsFromHDC(gdiplus.HDC(this.memdc))
 	this.context.SetTextRenderingHint(gdiplus.TextRenderingHintAntiAlias)
 	//this.context.SetSmoothingMode(gdiplus.SmoothingModeAntiAlias)
 

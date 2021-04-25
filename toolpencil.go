@@ -2,19 +2,28 @@ package main
 
 import (
 	. "gopaint/reza"
+
+	"github.com/lxn/win"
 )
 
 type ToolPencil struct {
 	ToolBasic
 	size int
+	//cursor win.HCURSOR
 }
 
 func (tool *ToolPencil) initialize() {
 	tool.size = 1
+	//utf16, _ := syscall.UTF16PtrFromString(".\\cursors\\PencilToolCursor.cur")
+	//tool.cursor = LoadCursorFromFile(utf16)
 }
 
 func (tool *ToolPencil) Dispose() {
 
+}
+
+func (tool *ToolPencil) getCursor(ptMouse *Point) win.HCURSOR {
+	return mainWindow.hCursorArrow
 }
 
 func (tool *ToolPencil) prepare() {

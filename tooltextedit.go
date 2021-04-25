@@ -1,9 +1,10 @@
 package main
 
 import (
-	"gopaint/gdiplus"
 	. "gopaint/reza"
 	"log"
+
+	"github.com/shahfarhadreza/go-gdiplus"
 
 	win "github.com/lxn/win"
 )
@@ -153,7 +154,7 @@ func (te *TextEdit) UpdateLines() {
 	defer canvas.ReleaseDC(hdc)
 	//g2 := NewGraphics(hdc)
 
-	g := gdiplus.NewGraphicsFromHDC(hdc)
+	g := gdiplus.NewGraphicsFromHDC(gdiplus.HDC(hdc))
 	g.SetTextRenderingHint(gdiplus.TextRenderingHintAntiAlias)
 
 	newLine := NewTextLine()
@@ -245,7 +246,7 @@ func (te *TextEdit) KeyPressEvent(keycode int) {
 }
 
 func (te *TextEdit) Draw(g *Graphics, color *Color) {
-	graphics := gdiplus.NewGraphicsFromHDC(g.GetHDC())
+	graphics := gdiplus.NewGraphicsFromHDC(gdiplus.HDC(g.GetHDC()))
 	//area := te.GetTextArea()
 	//RenderText(g, "I Am Shuvo", &area, color, te.font)
 	brush := gdiplus.NewSolidBrush(AsGdiplusColor(color))

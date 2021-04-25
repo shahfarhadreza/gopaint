@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-ole/go-ole"
 	win "github.com/lxn/win"
+	"github.com/shahfarhadreza/go-gdiplus"
 )
 
 type Application interface {
@@ -49,10 +50,10 @@ func NewApplication() Application {
 	}
 	logInfo("Initializing GDI+ ....")
 	// GDI+
-	var gdiplusStartupInput win.GdiplusStartupInput
-	var gdiplusToken win.GdiplusStartupOutput
+	var gdiplusStartupInput gdiplus.GdiplusStartupInput
+	var gdiplusToken gdiplus.GdiplusStartupOutput
 	gdiplusStartupInput.GdiplusVersion = 1
-	if win.GdiplusStartup(&gdiplusStartupInput, &gdiplusToken) != 0 {
+	if gdiplus.GdiplusStartup(&gdiplusStartupInput, &gdiplusToken) != 0 {
 		log.Panicln("failed to initialize GDI+")
 	}
 	logInfo("Done initializing everything!!!")
@@ -162,6 +163,6 @@ func (app *applicationData) Run() {
 			app.GUIFont.Dispose()
 		}
 	}
-	win.GdiplusShutdown()
+	gdiplus.GdiplusShutdown()
 	ole.CoUninitialize()
 }

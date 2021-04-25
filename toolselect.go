@@ -1,9 +1,10 @@
 package main
 
 import (
-	"gopaint/gdiplus"
 	. "gopaint/reza"
 	"strconv"
+
+	"github.com/shahfarhadreza/go-gdiplus"
 
 	win "github.com/lxn/win"
 )

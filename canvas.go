@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"gopaint/gdiplus"
 	. "gopaint/reza"
 	"image"
 	"image/draw"
@@ -12,6 +11,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/shahfarhadreza/go-gdiplus"
 
 	win "github.com/lxn/win"
 )
@@ -371,7 +372,7 @@ func (canvas *DrawingCanvas) OnResize(rect *Rect) {
 	if canvas.context != nil {
 		canvas.context.Dispose()
 	}
-	canvas.context = gdiplus.NewGraphicsFromHDC(canvas.mhdc)
+	canvas.context = gdiplus.NewGraphicsFromHDC(gdiplus.HDC(canvas.mhdc))
 	//canvas.context.SetSmoothingMode(gdiplus.SmoothingModeHighSpeed)
 }
 
